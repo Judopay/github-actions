@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p ~/.ssh
-echo ${{ inputs.ssh-private-key-base64 }} | base64 --decode > ~/.ssh/id_rsa
+echo $SSH_KEY_BASE64 | base64 --decode > ~/.ssh/id_rsa
 chmod 600 ~/.ssh/id_rsa
 ssh-add -D
 ssh-add ~/.ssh/id_rsa
