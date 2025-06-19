@@ -20,7 +20,7 @@ runs:
       destination: ${{ runner.temp }}/sonar/xccov-to-sonarqube-generic.sh
   - name: Prepare for Sonar Scan
     id: sonar-prep
-    run: prep.sh
+    run: ${{ github.action_path }}/prep.sh
     shell: bash
   - name: Sonar Scan Pull Request
     if: ${{ github.event_name == 'pull_request' }}
