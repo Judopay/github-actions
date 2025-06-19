@@ -1,0 +1,75 @@
+name: 'judopay/sonar-scan'
+description: 'Run a SonarCloud scan'
+inputs:
+  sonar-token:
+    description: 'Token to authenticate with SonarCloud'
+    required: true
+  uses-xccov:
+    description: 'Whether to convert XCCov coverage files to SonarQube format'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+  - name: Install XCCov to SonarQube Converter
+    if: inputs.uses-xccov == 'true' 
+    uses: ethanjli/cached-download-action@v0.1.2
+    id: install-xccov
+    with:
+      url: https://raw.githubusercontent.com/SonarSource/sonar-scanning-examples/1dd2b1b4736cc3be4d714770d469ed7c59deec1b/swift-coverage/swift-coverage-example/xccov-to-sonarqube-generic.sh
+      destination: ${{ runner.temp }}/sonar/xccov-to-sonarqube-generic.sh
+  - name: Detect Sonar Scan Variables
+    id: sonar-variables
+    run: |
+      mkdir -p ${{ runner.temp }}/sonar
+      echo "PROJECT_KEY=${{ github.repository_owner }}_$(basename ${{ github.repository }})" >> $GITHUB_OUTPUT
+
+      if COMPILATION_DATABASE_DIR="$(find $HOME -type d -name 'compilation_database')" && [ -n "${COMPILATION_DATABASE_DIR}" ];
+        echo "Found compilation database in $COMPILATION_DATABASE_DIR. Merging.";
+        # See below link for explanation of why we need to do this
+        # https://sonarsource.atlassian.net/browse/CPP-3987
+        sed -e '1s/^/[\'$'\n''/' -e '$s/,$/\'$'\n'']/' $COMPILATION_DATABASE_DIR/*.json > ${{ runner.temp }}/sonar/compile_commands.json
+        echo "COMPILE_COMMANDS_FILE=${{ runner.temp }}/sonar/compile_commands.json" >> $GITHUB_OUTPUT
+      fi
+
+      if [ "${{ inputs.uses-xccov }}" == "true" ]; then
+        RESULT_FOLDER=$(find $HOME -type d -regex ".*\.xcresult")
+        echo "Found XCCov coverage files in $RESULT_FOLDER. Converting to SonarQube format..."
+        chmod +x ${{ steps.install-xccov-converter.outputs.destination }}
+        ${{ steps.install-xccov-converter.outputs.destination }} $RESULT_FOLDER/ > ${{ runner.temp }}/sonar/sonarqube-generic-coverage.xml
+        echo "GENERIC_COVERAGE_FILE=${{ runner.temp }}/sonar/sonarqube-generic-coverage.xml" >> $GITHUB_OUTPUT
+      fi
+    shell: bash
+  - name: Sonar Scan Pull Request
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: SonarSource/sonarqube-scan-action@v4
+    env:
+      SONAR_TOKEN: ${{ inputs.sonar-token }}
+    with:
+      args: >
+        -Dproject.settings=.sonarscan
+        -Dsonar.cfamily.cache.enabled=false
+        -Dsonar.cfamily.compile-commands=${{ steps.sonar-variables.outputs.COMPILE_COMMANDS_FILE }}
+        -Dsonar.coverageReportPaths=${{ steps.sonar-variables.outputs.GENERIC_COVERAGE_FILE }}
+        -Dsonar.organization=judopay
+        -Dsonar.projectKey=${{ steps.sonar-variables.outputs.PROJECT_KEY }}
+        -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+        -Dsonar.pullrequest.branch=${{ github.ref_name }}
+        -Dsonar.pullrequest.github.repository=${{ github.repository }}
+        -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+        -Dsonar.pullrequest.provider=GitHub
+        -Dsonar.sources=${{ github.workspace }}
+  - name: Sonar Scan Main Branch
+    if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+    uses: SonarSource/sonarqube-scan-action@v4
+    env:
+      SONAR_TOKEN: ${{ inputs.sonar-token }}
+    with:
+      args: >
+        -Dproject.settings=.sonarscan
+        -Dsonar.cfamily.cache.enabled=false
+        -Dsonar.cfamily.compile-commands=${{ steps.sonar-variables.outputs.COMPILE_COMMANDS_FILE }}
+        -Dsonar.coverageReportPaths=${{ steps.sonar-variables.outputs.GENERIC_COVERAGE_FILE }}
+        -Dsonar.organization=judopay
+        -Dsonar.projectKey=${{ steps.sonar-variables.outputs.PROJECT_KEY }}
+        -Dsonar.sources=${{ github.workspace }}
