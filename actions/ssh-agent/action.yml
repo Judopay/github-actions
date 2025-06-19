@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
   - name: Set up SSH Agent
-    run: run.sh
+    run: ${{ github.action_path }}/run.sh
     shell: bash
 branding:
   icon: key
