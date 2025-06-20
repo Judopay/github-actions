@@ -20,11 +20,11 @@ runs:
       destination: ${{ runner.temp }}/sonar/xccov-to-sonarqube-generic.sh
   - name: Prepare for Sonar Scan
     env:
-      GIT_REPOSITORY_OWNER: github.repository_owner
-      GIT_REPOSITORY: github.repository
+      GIT_REPOSITORY_OWNER: ${{ github.repository_owner}}
+      GIT_REPOSITORY: ${{ github.repository }}
       OUTPUT_DIR: ${{ runner.temp }}/sonar
       SONAR_SOURCES: ${{ github.workspace }}
-      XCCOV_CONVERTER_BINARY: steps.install-xccov-converter.outputs.destination
+      XCCOV_CONVERTER_BINARY: ${{ steps.install-xccov-converter.outputs.destination }}
     id: sonar-prep
     run: ${{ github.action_path }}/prep.sh
     shell: bash
@@ -32,7 +32,7 @@ runs:
     if: github.event_name == 'pull_request'
     uses: SonarSource/sonarqube-scan-action@v4
     env:
-      SONAR_TOKEN: inputs.sonar-token
+      SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
       args: >
         ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
@@ -45,7 +45,7 @@ runs:
     if: github.event_name == 'push' && github.ref_name == 'master'
     uses: SonarSource/sonarqube-scan-action@v4
     env:
-      SONAR_TOKEN: inputs.sonar-token
+      SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
       args: >
         ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
