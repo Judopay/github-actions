@@ -22,7 +22,8 @@ runs:
     env:
       GIT_REPOSITORY_OWNER: github.repository_owner
       GIT_REPOSITORY: github.repository
-      USES_XCCOV: inputs.uses-xccov
+      OUTPUT_DIR: ${{ runner.temp }}/sonar
+      SONAR_SOURCES: ${{ github.workspace }}
       XCCOV_CONVERTER_BINARY: steps.install-xccov-converter.outputs.destination
     id: sonar-prep
     run: ${{ github.action_path }}/prep.sh
@@ -34,18 +35,12 @@ runs:
       SONAR_TOKEN: inputs.sonar-token
     with:
       args: >
-        -Dproject.settings=.sonarscan
-        -Dsonar.cfamily.cache.enabled=false
-        -Dsonar.cfamily.compile-commands=${{ steps.sonar-prep.outputs.COMPILE_COMMANDS_FILE }}
-        -Dsonar.coverageReportPaths=${{ steps.sonar-prep.outputs.GENERIC_COVERAGE_FILE }}
-        -Dsonar.organization=judopay
-        -Dsonar.projectKey=${{ steps.sonar-prep.outputs.PROJECT_KEY }}
+        ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
         -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
         -Dsonar.pullrequest.branch=${{ github.ref_name }}
         -Dsonar.pullrequest.github.repository=${{ github.repository }}
         -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
         -Dsonar.pullrequest.provider=GitHub
-        -Dsonar.sources=${{ github.workspace }}
   - name: Sonar Scan Main Branch
     if: github.event_name == 'push' && github.ref_name == 'master'
     uses: SonarSource/sonarqube-scan-action@v4
@@ -53,10 +48,4 @@ runs:
       SONAR_TOKEN: inputs.sonar-token
     with:
       args: >
-        -Dproject.settings=.sonarscan
-        -Dsonar.cfamily.cache.enabled=false
-        -Dsonar.cfamily.compile-commands=${{ steps.sonar-prep.outputs.COMPILE_COMMANDS_FILE }}
-        -Dsonar.coverageReportPaths=${{ steps.sonar-prep.outputs.GENERIC_COVERAGE_FILE }}
-        -Dsonar.organization=judopay
-        -Dsonar.projectKey=${{ steps.sonar-prep.outputs.PROJECT_KEY }}
-        -Dsonar.sources=${{ github.workspace }}
+        ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
