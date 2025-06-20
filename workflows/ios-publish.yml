@@ -1,0 +1,55 @@
+name: iOS Publish
+
+on:
+  workflow_call:
+    secrets:
+      cocoapods_trunk_token:
+        required: true
+        description: Token for CocoaPods trunk authentication for publishing pods
+      ios_app_store_connect_api_key:
+        required: true
+        description: API key for App Store Connect for code signing
+      match_password:
+        required: true
+        description: Password for Fastlane match, for retrieving code signing certificates
+      sonar_token:
+        required: true
+        description: Token for SonarCloud authentication
+      ssh_key_github:
+        required: true
+        description: SSH key for accessing Github repositories
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Install Github CLI
+      uses: tecolicom/actions-use-homebrew-tools@v1
+      with:
+        tools: gh
+    - name: Set up SSH Key
+      uses: Judopay/github-actions/actions/ssh-agent@master
+      with:
+        ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Run Build
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ios_app_store_connect_api_key }}
+        MATCH_PASSWORD: ${{ secrets.match_password }}
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+    - name: Publish
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ios_app_store_connect_api_key }}
+        COCOAPODS_TRUNK_TOKEN: ${{ secrets.cocoapods_trunk_token }}
+        MATCH_PASSWORD: ${{ secrets.match_password }}
+        GIT_TAG: ${{ github.ref_name }}
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+      with:
+        lane: publish
