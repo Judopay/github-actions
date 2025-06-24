@@ -43,6 +43,10 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+    - name: Install Github CLI & Carthage
+      uses: tecolicom/actions-use-homebrew-tools@v1
+      with:
+        tools: gh carthage
     - name: Carthage Bootstrap
       if: ${{ hashFiles('Cartfile.resolved') != '' }}
       uses: DevCycleHQ/carthage-bootstrap@v1
