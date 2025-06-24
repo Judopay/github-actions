@@ -1,0 +1,27 @@
+name: 'judopay/pod-install'
+description: 'Runs pod install for an iOS project, caching Pods directory'
+runs:
+  using: composite
+  steps:
+  - name: Scan for Podfiles
+    id: scan-for-podfiles
+    run: ${{ github.action_path }}/scan.sh
+    shell: bash
+  - name: Restore Pod Cache
+    id: pod-cache-restore
+    if: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS != '' }}
+    uses: actions/cache/restore@v4
+    with:
+      path: ${{ steps.scan-for-podfiles.outputs.POD_DIRS }}
+      key: ${{ hashFiles(steps.scan-for-podfiles.outputs.PODFILE_LOCKS) }}
+  - name: Install Pods
+    env:
+      PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
+    if: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS != '' && steps.pod-cache-restore.outputs.cache-hit != 'true' }}
+    run: ${{ github.action_path }}/install.sh
+    shell: bash
+  - name: Store Pod Cache
+    if: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS != '' && steps.pod-cache-restore.outputs.cache-hit != 'true' }}
+    uses: actions/cache/save@v4
+    with:
+      path: ${{ steps.scan-for-podfiles.outputs.POD_DIRS }}

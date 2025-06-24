@@ -20,14 +20,22 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
     - name: Set up SSH Key
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Carthage Bootstrap
+      if: ${{ hashFiles('Cartfile.resolved') != '' }}
+      uses: DevCycleHQ/carthage-bootstrap@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pod Install
+      uses: Judopay/github-actions/actions/pod-install@master
     - name: Run Build
       uses: maierj/fastlane-action@v3.1.0
       env:

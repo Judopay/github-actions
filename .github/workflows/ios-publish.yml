@@ -5,6 +5,9 @@ on:
       cocoapods_trunk_token:
         required: true
         description: Token for CocoaPods trunk authentication for publishing pods
+      github_token:
+        required: true
+        description: GitHub token used by Carthage to access private dependencies
       ios_app_store_connect_api_key:
         required: true
         description: API key for App Store Connect for code signing
@@ -31,18 +34,26 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
-    - name: Install Github CLI
-      uses: tecolicom/actions-use-homebrew-tools@v1
-      with:
-        tools: gh
     - name: Set up SSH Key
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Carthage Bootstrap
+      if: ${{ hashFiles('Cartfile.resolved') != '' }}
+      uses: DevCycleHQ/carthage-bootstrap@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pod Install
+      uses: Judopay/github-actions/actions/pod-install@master
+    - name: Install Github CLI
+      uses: tecolicom/actions-use-homebrew-tools@v1
+      with:
+        tools: gh
     - name: Run Build
       uses: maierj/fastlane-action@v3.1.0
       env:
