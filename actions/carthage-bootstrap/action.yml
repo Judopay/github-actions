@@ -1,5 +1,9 @@
 name: 'judopay/pod-install'
 description: 'Runs carthage bootstrap for an iOS project, caching Pods directory'
+inputs:
+  github-token:
+    description: 'Token to authenticate with Github'
+    required: true
 runs:
   using: composite
   steps:
@@ -12,6 +16,7 @@ runs:
   - name: Carthage Bootstrap
     env:
       PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
+      GITHUB_TOKEN: ${{ inputs.github-token }}
     if: ${{ steps.pod-cache-restore.outputs.cache-hit != 'true' }}
     run: carthage bootstrap --platform ios --use-xcframeworks --cache-builds --verbose
     shell: bash
