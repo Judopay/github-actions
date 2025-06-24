@@ -46,6 +46,7 @@ jobs:
         CODE_SIGNING_IDENTITY_ID: 95V535S6TQ
         MATCH_GIT_URL: git@github.com:Judopay/JudoKit-iOS-SigningCertificates.git
         MATCH_PASSWORD: ${{ secrets.match_password }}
+        XCODE_COMPILATION_DB_PATH: ${{ runner.temp }}/xcode/compilation_database
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
         lane: build
