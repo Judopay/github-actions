@@ -8,6 +8,7 @@ runs:
     uses: actions/cache/restore@v4
     with:
       path: ${{ github.workspace }}/Carthage
+      key: ${{ hashFiles('Cartfile.resolved') }}
   - name: Carthage Bootstrap
     env:
       PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
@@ -19,3 +20,4 @@ runs:
     uses: actions/cache/save@v4
     with:
       path: ${{ github.workspace }}/Carthage
+      key: ${{ hashFiles('Cartfile.resolved') }}
