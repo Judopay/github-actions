@@ -17,11 +17,11 @@ runs:
     env:
       PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
       GITHUB_TOKEN: ${{ inputs.github-token }}
-    if: ${{ steps.pod-cache-restore.outputs.cache-hit != 'true' }}
+    if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
     run: carthage bootstrap --platform ios --use-xcframeworks --cache-builds --verbose
     shell: bash
   - name: Store Pod Cache
-    if: ${{ steps.pod-cache-restore.outputs.cache-hit != 'true' }}
+    if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
     uses: actions/cache/save@v4
     with:
       path: ${{ github.workspace }}/Carthage
