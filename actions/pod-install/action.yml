@@ -25,3 +25,4 @@ runs:
     uses: actions/cache/save@v4
     with:
       path: ${{ steps.scan-for-podfiles.outputs.POD_DIRS }}
+      key: ${{ hashFiles(steps.scan-for-podfiles.outputs.PODFILE_LOCKS) }}
