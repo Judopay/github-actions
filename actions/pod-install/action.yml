@@ -18,7 +18,7 @@ runs:
     run: ${{ github.action_path }}/install.sh
     shell: bash
   - name: Store Pod Cache
-    if: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS != '' && steps.pod-cache-restore.outputs.cache-hit != 'true' }}
+    if: ${{ steps.pod-cache-restore.outputs.cache-hit != 'true' }}
     uses: actions/cache/save@v4
     with:
       path: '**/Pods'
