@@ -38,6 +38,10 @@ jobs:
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
