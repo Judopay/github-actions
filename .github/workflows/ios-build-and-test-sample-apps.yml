@@ -1,4 +1,4 @@
-name: iOS Build and Test
+name: iOS Build and Test Sample Apps
 on:
   workflow_call:
     secrets:
@@ -8,9 +8,6 @@ on:
       match_password:
         required: true
         description: Password for Fastlane match, for retrieving code signing certificates
-      sonar_token:
-        required: true
-        description: Token for SonarCloud authentication
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories
@@ -47,18 +44,18 @@ jobs:
         MATCH_GIT_URL: git@github.com:Judopay/JudoKit-iOS-SigningCertificates.git
         MATCH_PASSWORD: ${{ secrets.match_password }}
         STAGING_HOST_NAME: ${{ secrets.staging_domain }}
-        XCODE_COMPILATION_DB_PATH: ${{ runner.temp }}/xcode/compilation_database
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
-        lane: build
+        lane: build_sample_apps
     - name: Run Tests
       uses: maierj/fastlane-action@v3.1.0
       env:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
-        lane: test
-    - name: Run Sonar Scan
-      uses: Judopay/github-actions/actions/sonar-scan@master
+        lane: test_sample_apps
+    - name: Run Instrumentation Tests on Simulator
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
-        sonar-token: ${{ secrets.sonar_token }}
-        uses-xccov: "true"
+        lane: test_sample_apps_simulator

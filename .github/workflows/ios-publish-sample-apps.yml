@@ -1,4 +1,4 @@
-name: iOS Build and Test
+name: iOS Publish Sample Apps
 on:
   workflow_call:
     secrets:
@@ -8,12 +8,12 @@ on:
       match_password:
         required: true
         description: Password for Fastlane match, for retrieving code signing certificates
-      sonar_token:
-        required: true
-        description: Token for SonarCloud authentication
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
 jobs:
   build_and_test:
     runs-on: macos-14
@@ -24,6 +24,12 @@ jobs:
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        credentials_file_path: ${{ runner.temp }}/gcloud/credentials.json
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
@@ -47,18 +53,12 @@ jobs:
         MATCH_GIT_URL: git@github.com:Judopay/JudoKit-iOS-SigningCertificates.git
         MATCH_PASSWORD: ${{ secrets.match_password }}
         STAGING_HOST_NAME: ${{ secrets.staging_domain }}
-        XCODE_COMPILATION_DB_PATH: ${{ runner.temp }}/xcode/compilation_database
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
-        lane: build
-    - name: Run Tests
+        lane: build_sample_apps
+    - name: Publish Sample Apps
       uses: maierj/fastlane-action@v3.1.0
       env:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
-        lane: test
-    - name: Run Sonar Scan
-      uses: Judopay/github-actions/actions/sonar-scan@master
-      with:
-        sonar-token: ${{ secrets.sonar_token }}
-        uses-xccov: "true"
+        lane: publish_sample_apps
