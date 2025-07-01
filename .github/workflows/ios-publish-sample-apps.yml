@@ -2,6 +2,9 @@ name: iOS Publish Sample Apps
 on:
   workflow_call:
     secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
       ios_app_store_connect_api_key:
         required: true
         description: API key for App Store Connect for code signing
@@ -11,9 +14,6 @@ on:
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories
-      google_cloud_service_account_key:
-        required: true
-        description: JSON key for Google Cloud service account for Firebase authentication
 jobs:
   build_and_test:
     runs-on: macos-14

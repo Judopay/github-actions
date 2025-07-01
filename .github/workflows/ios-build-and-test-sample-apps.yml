@@ -2,6 +2,9 @@ name: iOS Build and Test Sample Apps
 on:
   workflow_call:
     secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
       ios_app_store_connect_api_key:
         required: true
         description: API key for App Store Connect for code signing
@@ -21,6 +24,12 @@ jobs:
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        credentials_file_path: ${{ runner.temp }}/gcloud/credentials.json
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
