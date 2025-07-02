@@ -29,7 +29,6 @@ jobs:
       with:
         create_credentials_file: true
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
-        credentials_file_path: ${{ runner.temp }}/gcloud/credentials.json
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1

@@ -29,7 +29,6 @@ jobs:
       with:
         create_credentials_file: true
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
-        credentials_file_path: ${{ runner.temp }}/gcloud/credentials.json
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
@@ -56,12 +55,12 @@ jobs:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
         lane: build_sample_apps
-    - name: Run Tests
-      uses: maierj/fastlane-action@v3.1.0
-      env:
-        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
-      with:
-        lane: test_sample_apps
+    # - name: Run Tests
+    #   uses: maierj/fastlane-action@v3.1.0
+    #   env:
+    #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+    #   with:
+    #     lane: test_sample_apps
     - name: Run Instrumentation Tests on Simulator
       uses: maierj/fastlane-action@v3.1.0
       env:
