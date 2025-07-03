@@ -1,0 +1,27 @@
+name: iOS Test Sample Apps with Firebase
+on:
+  workflow_call:
+    secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
+jobs:
+  build_and_test:
+    runs-on: macos-14
+    steps:
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+    - name: Download Instrumentation Test Packages
+      uses: actions/download-artifact@v4
+      with:
+        name: instrumentation-test-packages
+        path: ${{ runner.temp }}/fastlane_output
+    - name: Run Instrumentation Tests on Firebase
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+      with:
+        lane: test_sample_apps_firebase
