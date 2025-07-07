@@ -75,3 +75,4 @@ jobs:
         glob: '*.zip'
         parent: false
         path: ${{ runner.temp }}/fastlane_output
+        process_gcloudignore: false
