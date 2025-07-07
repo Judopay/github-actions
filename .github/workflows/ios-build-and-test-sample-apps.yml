@@ -73,4 +73,5 @@ jobs:
       with:
         destination: ${{ vars.firebase_results_bucket }}
         glob: '*.zip'
+        parent: false
         path: ${{ runner.temp }}/fastlane_output
