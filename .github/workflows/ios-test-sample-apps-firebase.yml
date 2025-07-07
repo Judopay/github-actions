@@ -25,5 +25,6 @@ jobs:
       uses: maierj/fastlane-action@v3.1.0
       env:
         FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
+        GOOGLE_CLOUD_PROJECT: ${{ vars.firebase_gcp_project }}
       with:
         lane: test_sample_apps_firebase
