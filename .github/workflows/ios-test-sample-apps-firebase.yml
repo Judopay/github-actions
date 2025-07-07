@@ -21,6 +21,8 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v2
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
