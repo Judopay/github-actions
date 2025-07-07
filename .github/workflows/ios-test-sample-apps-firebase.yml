@@ -21,14 +21,9 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - name: Download Instrumentation Test Packages
-      uses: actions/download-artifact@v4
-      with:
-        name: instrumentation-test-packages
-        path: ${{ runner.temp }}/fastlane_output
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
-        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+        FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
       with:
         lane: test_sample_apps_firebase

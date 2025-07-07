@@ -68,10 +68,9 @@ jobs:
     #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
     #   with:
     #     lane: test_sample_apps_simulator
-    - name: Archive Instrumentation Test Packages
-      uses: actions/upload-artifact@v4
+    - name: Upload Instrumentation Test Packages
+      uses: google-github-actions/upload-cloud-storage@v2
       with:
-        if-no-files-found: error
-        name: instrumentation-test-packages
-        overwrite: true
-        path: ${{ runner.temp }}/fastlane_output/*.zip
+        destination: ${{ vars.firebase_results_bucket }}
+        glob: '*.zip'
+        path: ${{ runner.temp }}/fastlane_output
