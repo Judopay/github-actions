@@ -36,7 +36,7 @@ jobs:
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
-        GCLOUD_PROJECT: ${{ vars.firebase_gcp_project }}
+        CLOUDSDK_PROJECT: ${{ vars.firebase_gcp_project }}
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
         FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
