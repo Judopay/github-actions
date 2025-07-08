@@ -1,13 +1,18 @@
 name: iOS Test Sample Apps with Firebase
 on:
   workflow_call:
+    inputs:
+      firebase_matrix_label:
+        description: Label for the Firebase test matrix
+        required: true
+        type: string
     secrets:
       google_cloud_service_account_key:
-        required: true
         description: JSON key for Google Cloud service account for Firebase authentication
+        required: true
 jobs:
-  build_and_test:
-    runs-on: macos-14
+  test_sample_apps:
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -33,5 +38,6 @@ jobs:
       env:
         GOOGLE_CLOUD_PROJECT: ${{ vars.firebase_gcp_project }}
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+        FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
       with:
         lane: test_sample_apps_firebase
