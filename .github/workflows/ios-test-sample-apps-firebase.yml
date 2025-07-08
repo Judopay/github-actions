@@ -21,6 +21,7 @@ jobs:
       with:
         create_credentials_file: true
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_project_id }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
@@ -28,8 +29,6 @@ jobs:
         bundler-cache: true
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ vars.firebase_project_id }}
     - name: Download Instrumentation Test Packages
       run: |
         mkdir -p ${{ runner.temp }}/fastlane_output
