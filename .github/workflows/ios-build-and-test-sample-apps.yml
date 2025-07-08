@@ -71,7 +71,7 @@ jobs:
     - name: Upload Instrumentation Test Packages
       uses: google-github-actions/upload-cloud-storage@v2
       with:
-        destination: ${{ vars.firebase_results_bucket }}
+        destination: ${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages
         glob: '*.zip'
         parent: false
         path: ${{ runner.temp }}/fastlane_output

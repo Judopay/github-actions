@@ -21,12 +21,15 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - name: 'Set up Cloud SDK'
+    - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
+    - name: Download Instrumentation Test Packages
+      run: gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
+      shell: bash
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
-        FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
         GOOGLE_CLOUD_PROJECT: ${{ vars.firebase_gcp_project }}
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         lane: test_sample_apps_firebase
