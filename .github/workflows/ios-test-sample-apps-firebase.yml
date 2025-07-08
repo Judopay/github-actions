@@ -28,6 +28,8 @@ jobs:
         bundler-cache: true
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ vars.firebase_project_id }}
     - name: Download Instrumentation Test Packages
       run: |
         mkdir -p ${{ runner.temp }}/fastlane_output
@@ -36,7 +38,6 @@ jobs:
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
-        CLOUDSDK_PROJECT: ${{ vars.firebase_gcp_project }}
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
         FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
