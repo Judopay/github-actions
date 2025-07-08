@@ -24,7 +24,9 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
     - name: Download Instrumentation Test Packages
-      run: gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
+      run: |
+        mkdir -p ${{ runner.temp }}/fastlane_output
+        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
       shell: bash
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
