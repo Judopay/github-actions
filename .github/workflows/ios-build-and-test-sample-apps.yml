@@ -60,12 +60,12 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: instrumentation-test-packages
-        path: ${{ runner.temp }}/fastlane_output/!(*.dSYM).zip
+        path: ${{ runner.temp }}/fastlane_output/*.zip
     - name: Store Sample Apps
       uses: actions/upload-artifact@v4
       with:
         name: sample-apps
-        path: ${{ runner.temp }}/fastlane_output/*.app
+        path: ${{ runner.temp }}/fastlane_output/*.ipa
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0
     #   env:
