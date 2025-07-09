@@ -1,10 +1,7 @@
-name: iOS Build, Test and Publish Sample Apps
+name: iOS Build and Test Sample Apps
 on:
   workflow_call:
     secrets:
-      google_cloud_service_account_key:
-        required: true
-        description: JSON key for Google Cloud service account for Firebase authentication
       ios_app_store_connect_api_key:
         required: true
         description: API key for App Store Connect for code signing
@@ -24,11 +21,6 @@ jobs:
       uses: Judopay/github-actions/actions/ssh-agent@master
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
-    - name: Set up Google Cloud Authentication
-      uses: google-github-actions/auth@v2
-      with:
-        create_credentials_file: true
-        credentials_json: ${{ secrets.google_cloud_service_account_key }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
@@ -56,6 +48,16 @@ jobs:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
         lane: build_sample_apps
+    - name: Store Instrumentation Test Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: instrumentation-test-packages
+        path: ${{ runner.temp }}/fastlane_output/!(*.dSYM).zip
+    - name: Store Sample Apps
+      uses: actions/upload-artifact@v4
+      with:
+        name: sample-apps
+        path: ${{ runner.temp }}/fastlane_output/*.app
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0
     #   env:
@@ -68,17 +70,3 @@ jobs:
     #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
     #   with:
     #     lane: test_sample_apps_simulator
-    - name: Upload Instrumentation Test Packages
-      uses: google-github-actions/upload-cloud-storage@v2
-      with:
-        destination: ${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages
-        glob: '**/!(*.dSYM).zip'
-        parent: false
-        path: ${{ runner.temp }}/fastlane_output
-        process_gcloudignore: false
-    - name: Publish Sample Apps
-      uses: maierj/fastlane-action@v3.1.0
-      env:
-        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
-      with:
-        lane: publish_sample_apps

@@ -1,0 +1,47 @@
+name: iOS Publish Sample Apps
+on:
+  workflow_call:
+    secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
+jobs:
+  publish_sample_apps:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Restore Instrumentation Test Packages
+      uses: actions/download-artifact@v4
+      with:
+        name: instrumentation-test-packages
+        path: ${{ runner.temp }}/fastlane_output
+    - name: Publish Instrumentation Test Packages
+      uses: google-github-actions/upload-cloud-storage@v2
+      with:
+        destination: ${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages
+        glob: '**/!(*.dSYM).zip'
+        parent: false
+        path: ${{ runner.temp }}/fastlane_output
+        process_gcloudignore: false
+    - name: Restore Sample Apps
+      uses: actions/download-artifact@v4
+      with:
+        name: sample-apps
+        path: ${{ runner.temp }}/fastlane_output
+    - name: Publish Sample Apps
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+      with:
+        lane: publish_sample_apps
