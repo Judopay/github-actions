@@ -2,6 +2,11 @@ name: iOS Test Sample Apps with Firebase
 on:
   workflow_call:
     inputs:
+      fastlane_options:
+        description: Custom paramters as a JSON string passed to Fastlane
+        required: false
+        type: string
+        default: '{}'
       firebase_matrix_label:
         description: Label for the Firebase test matrix
         required: true
@@ -42,3 +47,4 @@ jobs:
         FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
       with:
         lane: test_sample_apps_firebase
+        options: ${{ inputs.fastlane_options }}
