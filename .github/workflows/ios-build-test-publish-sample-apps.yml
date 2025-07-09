@@ -1,4 +1,4 @@
-name: iOS Build and Test Sample Apps
+name: iOS Build, Test and Publish Sample Apps
 on:
   workflow_call:
     secrets:
@@ -76,3 +76,9 @@ jobs:
         parent: false
         path: ${{ runner.temp }}/fastlane_output
         process_gcloudignore: false
+    - name: Publish Sample Apps
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+      with:
+        lane: publish_sample_apps
