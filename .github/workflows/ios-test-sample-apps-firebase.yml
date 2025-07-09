@@ -1,13 +1,23 @@
 name: iOS Test Sample Apps with Firebase
 on:
   workflow_call:
+    inputs:
+      fastlane_options:
+        description: Custom paramters as a JSON string passed to Fastlane
+        required: false
+        type: string
+        default: '{}'
+      firebase_matrix_label:
+        description: Label for the Firebase test matrix
+        required: true
+        type: string
     secrets:
       google_cloud_service_account_key:
-        required: true
         description: JSON key for Google Cloud service account for Firebase authentication
+        required: true
 jobs:
-  build_and_test:
-    runs-on: macos-14
+  test_sample_apps:
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -16,19 +26,25 @@ jobs:
       with:
         create_credentials_file: true
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_gcp_project }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
     - name: Download Instrumentation Test Packages
-      uses: actions/download-artifact@v4
-      with:
-        name: instrumentation-test-packages
-        path: ${{ runner.temp }}/fastlane_output
+      run: |
+        mkdir -p ${{ runner.temp }}/fastlane_output
+        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
+      shell: bash
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+        FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
+        FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
       with:
         lane: test_sample_apps_firebase
+        options: ${{ inputs.fastlane_options }}
