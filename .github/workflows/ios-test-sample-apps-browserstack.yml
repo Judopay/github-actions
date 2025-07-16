@@ -2,7 +2,7 @@ name: iOS Test Sample Apps with BrowserStack
 on:
   workflow_call:
     secrets:
-      browserstack_user:
+      browserstack_username:
         description: The user to authenticate with BrowserStack
         required: true
       browserstack_access_key:
