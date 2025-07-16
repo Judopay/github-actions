@@ -1,19 +1,15 @@
-name: iOS Test Sample Apps with Firebase
+name: iOS Test Sample Apps with BrowserStack
 on:
   workflow_call:
-    inputs:
-      fastlane_options:
-        description: Custom parameters as a JSON string passed to Fastlane
-        required: false
-        type: string
-        default: '{}'
-      firebase_matrix_label:
-        description: Label for the Firebase test matrix
-        required: true
-        type: string
     secrets:
+      browserstack_user:
+        description: The user to authenticate with BrowserStack
+        required: true
+      browserstack_access_key:
+        description: The access key to authenticate with BrowserStack
+        required: true
       google_cloud_service_account_key:
-        description: JSON key for Google Cloud service account for Firebase authentication
+        description: JSON key for Google Cloud service account for GCS authentication
         required: true
 jobs:
   test_sample_apps:
@@ -34,17 +30,17 @@ jobs:
         bundler-cache: true
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
-    - name: Download Instrumentation Test Packages
+    - name: Download Instrumentation Test Packages & Sample Apps
       run: |
         mkdir -p ${{ runner.temp }}/fastlane_output
         gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
+        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-sample-apps/* ${{ runner.temp }}/fastlane_output
       shell: bash
-    - name: Run Instrumentation Tests on Firebase
+    - name: Run Instrumentation Tests on BrowserStack
       uses: maierj/fastlane-action@v3.1.0
       env:
+        BROWSERSTACK_ACCESS_KEY: ${{ secrets.browserstack_access_key }}
+        BROWSERSTACK_USERNAME: ${{ secrets.browserstack_username }}
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
-        FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
-        FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
       with:
-        lane: test_sample_apps_firebase
-        options: ${{ inputs.fastlane_options }}
+        lane: test_sample_apps_browserstack

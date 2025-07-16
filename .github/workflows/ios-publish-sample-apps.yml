@@ -26,7 +26,7 @@ jobs:
       with:
         name: instrumentation-test-packages
         path: ${{ runner.temp }}/fastlane_output
-    - name: Publish Instrumentation Test Packages
+    - name: Store Instrumentation Test Packages
       uses: google-github-actions/upload-cloud-storage@v2
       with:
         destination: ${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages
@@ -39,7 +39,15 @@ jobs:
       with:
         name: sample-apps
         path: ${{ runner.temp }}/fastlane_output
-    - name: Publish Sample Apps
+    - name: Store Sample Apps
+      uses: google-github-actions/upload-cloud-storage@v2
+      with:
+        destination: ${{ vars.firebase_results_bucket }}/ios-sample-apps
+        glob: '**/*.ipa'
+        parent: false
+        path: ${{ runner.temp }}/fastlane_output
+        process_gcloudignore: false
+    - name: Publish Sample Apps to Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
