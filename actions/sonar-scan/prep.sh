@@ -28,4 +28,12 @@ if XCCOV_RESULTS_DIR="$(find $HOME -type d -regex ".*\.xcresult")" && [ -n "${XC
     PARAMS+=(-Dsonar.coverageReportPaths=$GENERIC_COVERAGE_FILE)
 fi
 
-echo "SONAR_ARGS=${PARAMS[@]}" >> $GITHUB_OUTPUT
+if JACOCO_COVERAGE_FILE="$(find $HOME -type f -name 'jacocoTestReport.xml')" && [ -n "${JACOCO_COVERAGE_FILE}" ]; then
+    echo "Found JaCoCo coverage file at $JACOCO_COVERAGE_FILE. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.coverage.jacoco.xmlReportPaths="$JACOCO_COVERAGE_FILE")
+fi
+
+if [ -d "$HOME/.gradle/caches" ]; then
+    echo "Found Gradle cache in $HOME/.gradle/caches. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.java.libraries="$HOME/.gradle/caches/**/*.jar")
+fi
