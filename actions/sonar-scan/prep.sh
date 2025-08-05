@@ -37,3 +37,5 @@ if [ -d "$HOME/.gradle/caches" ]; then
     echo "Found Gradle cache in $HOME/.gradle/caches. Adding to SonarQube parameters."
     PARAMS+=(-Dsonar.java.libraries="$HOME/.gradle/caches/**/*.jar")
 fi
+
+echo "SONAR_ARGS=${PARAMS[@]}" >> $GITHUB_OUTPUT
