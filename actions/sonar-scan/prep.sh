@@ -38,7 +38,7 @@ if [ -d "$HOME/.gradle/caches" ]; then
     PARAMS+=(-Dsonar.java.libraries="$HOME/.gradle/caches/**/*.jar")
 fi
 
-if TEST_LOCATIONS="$(find $HOME -not -path './node_modules/*' -wholename '*/src/test' | tr '\n' ',')" && [ -n "${TEST_LOCATIONS}" ]; then
+if TEST_LOCATIONS="$(find $SONAR_SOURCES -not -path './node_modules/*' -wholename '*/src/test' | tr '\n' ',' | sed 's/,/\/**\/*,/g')" && [ -n "${TEST_LOCATIONS}" ]; then
     echo "Found test locations: $TEST_LOCATIONS. Adding to SonarQube parameters."
     PARAMS+=(-Dsonar.tests="$TEST_LOCATIONS")
 fi
