@@ -1,0 +1,57 @@
+name: Android Build and Test Sample Apps
+on:
+  workflow_call:
+    secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for Firebase authentication
+      android_app_signing_private_key_base64:
+        required: true
+        description: Base64 encoded private key for Android app signing
+      android_app_signing_certificate_base64:
+        required: true
+        description: Base64 encoded certificate for Android app signing
+      android_app_signing_keystore_password:
+        required: true
+        description: Password for the Android app signing keystore
+jobs:
+  build_and_test:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Run Build
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        ANDROID_SIGNING_PRIVATE_KEY: ${{ secrets.android_app_signing_private_key_base64 }}
+        ANDROID_SIGNING_CERTIFICATE: ${{ secrets.android_app_signing_certificate_base64 }}
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.android_app_signing_keystore_password }}
+      with:
+        lane: build_sample_apps
+    - name: Store Sample Apps
+      uses: actions/upload-artifact@v4
+      with:
+        name: sample-apps
+        path: '**/*.apk'
+    # - name: Run Tests
+    #   uses: maierj/fastlane-action@v3.1.0
+    #   env:
+    #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+    #   with:
+    #     lane: test_sample_apps
+    # - name: Run Instrumentation Tests on Simulator
+    #   uses: maierj/fastlane-action@v3.1.0
+    #   env:
+    #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+    #   with:
+    #     lane: test_sample_apps_simulator
