@@ -38,4 +38,14 @@ if [ -d "$HOME/.gradle/caches" ]; then
     PARAMS+=(-Dsonar.java.libraries="$HOME/.gradle/caches/**/*.jar")
 fi
 
+if TEST_LOCATIONS="$(find $HOME -not -path './node_modules/*' -wholename '*/src/test' | tr '\n' ',')" && [ -n "${TEST_LOCATIONS}" ]; then
+    echo "Found test locations: $TEST_LOCATIONS. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.tests="$TEST_LOCATIONS")
+fi
+
+if ANDROID_LINT_FILE="$(find $HOME -name lint-results-debug.xml)" && [ -n "${ANDROID_LINT_FILE}" ]; then
+    echo "Found Android lint results file at $ANDROID_LINT_FILE. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.androidLint.reportPaths="$ANDROID_LINT_FILE")
+fi
+
 echo "SONAR_ARGS=${PARAMS[@]}" >> $GITHUB_OUTPUT
