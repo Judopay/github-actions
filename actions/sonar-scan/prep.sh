@@ -41,7 +41,7 @@ fi
 if TEST_LOCATIONS="$(find $SONAR_SOURCES -not -path './node_modules/*' -wholename '*/src/test' | tr '\n' ',')" && [ -n "${TEST_LOCATIONS}" ]; then
     echo "Found test locations: $TEST_LOCATIONS. Adding to SonarQube parameters."
     PARAMS+=(-Dsonar.tests="$TEST_LOCATIONS")
-    TEST_EXCLUSIONS=$(echo "$TEST_LOCATIONS" | sed 's/,/\/**\/*,/g')
+    TEST_EXCLUSIONS=$(echo "$TEST_LOCATIONS" | sed "s~$SONAR_SOURCES/~~g" | sed 's/,/\/**\/*,/g')
     PARAMS+=(-Dsonar.exclusions="$TEST_EXCLUSIONS")
 fi
 
