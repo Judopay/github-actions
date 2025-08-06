@@ -16,6 +16,7 @@ jobs:
       with:
         create_credentials_file: true
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_gcp_project }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
@@ -31,6 +32,7 @@ jobs:
         destination: ${{ vars.firebase_results_bucket }}/android-sample-apps
         glob: '**/*.apk'
         parent: false
+        path: ${{ github.workspace }}
         process_gcloudignore: false
     - name: Publish Sample Apps to Firebase
       uses: maierj/fastlane-action@v3.1.0

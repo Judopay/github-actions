@@ -42,6 +42,7 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_gcp_project }}
     - name: Set up Ruby
       if: ${{ hashFiles('Gemfile.lock') != '' }}
       uses: ruby/setup-ruby@v1
