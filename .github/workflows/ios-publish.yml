@@ -14,9 +14,6 @@ on:
       match_password:
         required: true
         description: Password for Fastlane match, for retrieving code signing certificates
-      sonar_token:
-        required: true
-        description: Token for SonarCloud authentication
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories

@@ -1,0 +1,36 @@
+name: Android Publish
+on:
+  workflow_call:
+    secrets:
+      sonatype_password:
+        required: true
+        description: Password for Sonatype account used for publishing artifacts
+      sonatype_signing_key_base64:
+        required: true
+        description: Base64 encoded signing key for Sonatype
+      sonatype_signing_key_password:
+        required: true
+        description: Password for the Sonatype signing key
+      sonatype_username:
+        required: true
+        description: Username for Sonatype account used for publishing artifacts
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Publish
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        ORG_GRADLE_PROJECT_signingKey_base64: ${{ secrets.sonatype_signing_key_base64 }}
+        ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.sonatype_signing_key_password }}
+        ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.sonatype_password }}
+        ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.sonatype_username }}
+      with:
+        lane: publish
