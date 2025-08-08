@@ -14,6 +14,12 @@ on:
       android_app_signing_keystore_password:
         required: true
         description: Password for the Android app signing keystore
+      android_3ds2_sample_app_google_services_json_base64:
+        required: true
+        description: Base64 encoded google-services.json for the 3DS2 sample app
+      android_devicedna_sample_app_google_services_json_base64:
+        required: true
+        description: Base64 encoded google-services.json for the DeviceDNA sample app
 jobs:
   build_and_test:
     runs-on: ubuntu-24.04
@@ -37,6 +43,8 @@ jobs:
         ANDROID_SIGNING_PRIVATE_KEY: ${{ secrets.android_app_signing_private_key_base64 }}
         ANDROID_SIGNING_CERTIFICATE: ${{ secrets.android_app_signing_certificate_base64 }}
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.android_app_signing_keystore_password }}
+        3DS2_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_3ds2_sample_app_google_services_json_base64 }}
+        DEVICEDNA_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_devicedna_sample_app_google_services_json_base64 }}
       with:
         lane: build_sample_apps
     - name: Store Sample Apps
