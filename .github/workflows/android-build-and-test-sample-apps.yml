@@ -15,10 +15,10 @@ on:
         required: true
         description: Password for the Android app signing keystore
       android_3ds2_sample_app_google_services_json_base64:
-        required: true
+        required: false
         description: Base64 encoded google-services.json for the 3DS2 sample app
       android_devicedna_sample_app_google_services_json_base64:
-        required: true
+        required: false
         description: Base64 encoded google-services.json for the DeviceDNA sample app
 jobs:
   build_and_test:
