@@ -1,11 +1,6 @@
 name: Test Sample Apps with BrowserStack
 on:
   workflow_call:
-    inputs:
-      target_directory:
-        description: The directory which sample app files will be restored to
-        required: true
-        type: string
     secrets:
       browserstack_username:
         description: The user to authenticate with BrowserStack
@@ -37,13 +32,14 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     - name: Restore Instrumentation Test Packages & Sample Apps
       run: |
-        mkdir -p ${{ inputs.target_directory }}
-        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}/* ${{ inputs.target_directory }}
+        mkdir -p ${{ runner.temp }}/fastlane_output
+        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}/* ${{ runner.temp }}/fastlane_output
       shell: bash
     - name: Run Instrumentation Tests on BrowserStack
       uses: maierj/fastlane-action@v3.1.0
       env:
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.browserstack_access_key }}
         BROWSERSTACK_USERNAME: ${{ secrets.browserstack_username }}
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         lane: test_sample_apps_browserstack

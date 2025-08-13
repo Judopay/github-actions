@@ -62,11 +62,13 @@ jobs:
         ANDROID_SIGNING_CERTIFICATE: ${{ secrets.android_app_signing_certificate_base64 }}
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.android_app_signing_keystore_password }}
         DEVICEDNA_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_devicedna_sample_app_google_services_json_base64 }}
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         JUDO_API_ID: ${{ secrets.mobile_testing_judo_id }}
         JUDO_API_SECRET: ${{ secrets.mobile_testing_judo_api_secret }}
         JUDO_API_TOKEN: ${{ secrets.mobile_testing_judo_api_token }}
         RAVELIN_MOCK_SERVER_URL: ${{ secrets.mobile_testing_ravelin_mock_server_url }}
         RSA_PUBLIC_KEY: ${{ secrets.mobile_testing_ravelin_public_key }}
+        STAGING_HOST_NAME: ${{ secrets.staging_domain }}
         THREEDS2_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_3ds2_sample_app_google_services_json_base64 }}
       with:
         lane: build_sample_apps
@@ -74,4 +76,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: sample-apps
-        path: '**/*.apk'
+        path: '${{ runner.temp }}/fastlane_output/*.apk'

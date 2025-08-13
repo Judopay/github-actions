@@ -1,11 +1,6 @@
 name: Publish Sample Apps
 on:
   workflow_call:
-    inputs:
-      source_folder:
-        required: true
-        description: Source folder containing the artifacts to upload. All subfolders will be searched for .ipa, .apk, and .zip files.
-        type: string
     secrets:
       google_cloud_service_account_key:
         required: true
@@ -31,16 +26,18 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: sample-apps
-        path: ${{ inputs.source_folder }}
+        path: ${{ runner.temp }}/fastlane_output
     - name: Store Sample Apps in GCS
       uses: google-github-actions/upload-cloud-storage@v2
       with:
         destination: ${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}
         glob: '**/!(*.dSYM).[iza][pi][apk]'
         parent: false
-        path: ${{ inputs.source_folder }}
+        path: ${{ runner.temp }}/fastlane_output
         process_gcloudignore: false
     - name: Publish Sample Apps to Firebase
       uses: maierj/fastlane-action@v3.1.0
+      env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         lane: publish_sample_apps
