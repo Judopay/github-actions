@@ -1,6 +1,11 @@
-name: iOS Publish Sample Apps
+name: Publish Sample Apps
 on:
   workflow_call:
+    inputs:
+      source_folder:
+        required: true
+        description: Source folder containing the artifacts to upload. All subfolders will be searched for .ipa, .apk, and .zip files.
+        type: string
     secrets:
       google_cloud_service_account_key:
         required: true
@@ -22,35 +27,20 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - name: Restore Instrumentation Test Packages
-      uses: actions/download-artifact@v4
-      with:
-        name: instrumentation-test-packages
-        path: ${{ runner.temp }}/fastlane_output
-    - name: Store Instrumentation Test Packages
-      uses: google-github-actions/upload-cloud-storage@v2
-      with:
-        destination: ${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages
-        glob: '**/!(*.dSYM).zip'
-        parent: false
-        path: ${{ runner.temp }}/fastlane_output
-        process_gcloudignore: false
     - name: Restore Sample Apps
       uses: actions/download-artifact@v4
       with:
         name: sample-apps
-        path: ${{ runner.temp }}/fastlane_output
-    - name: Store Sample Apps
+        path: ${{ inputs.source_folder }}
+    - name: Store Sample Apps in GCS
       uses: google-github-actions/upload-cloud-storage@v2
       with:
-        destination: ${{ vars.firebase_results_bucket }}/ios-sample-apps
-        glob: '**/*.ipa'
+        destination: ${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}
+        glob: '**/!(*.dSYM).[iza][pi][apk]'
         parent: false
-        path: ${{ runner.temp }}/fastlane_output
+        path: ${{ inputs.source_folder }}
         process_gcloudignore: false
     - name: Publish Sample Apps to Firebase
       uses: maierj/fastlane-action@v3.1.0
-      env:
-        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         lane: publish_sample_apps

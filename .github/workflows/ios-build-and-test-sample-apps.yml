@@ -11,9 +11,27 @@ on:
       match_password:
         required: true
         description: Password for Fastlane match, for retrieving code signing certificates
+      mobile_testing_judo_api_secret:
+        required: true
+        description: Judo API secret for mobile testing
+      mobile_testing_judo_api_token:
+        required: true
+        description: Judo API token for mobile testing
+      mobile_testing_judo_id:
+        required: true
+        description: Judo ID for mobile testing
+      mobile_testing_ravelin_mock_server_url:
+        required: true
+        description: Ravelin mock server URL for mobile testing
+      mobile_testing_ravelin_public_key:
+        required: true
+        description: Ravelin public key for mobile testing
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories
+      staging_domain:
+        required: true
+        description: Staging environment domain name for mobile testing
 jobs:
   build_and_test:
     runs-on: macos-14
@@ -62,16 +80,11 @@ jobs:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
         lane: build_sample_apps
-    - name: Store Instrumentation Test Packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: instrumentation-test-packages
-        path: ${{ runner.temp }}/fastlane_output/*.zip
     - name: Store Sample Apps
       uses: actions/upload-artifact@v4
       with:
         name: sample-apps
-        path: ${{ runner.temp }}/fastlane_output/*.ipa
+        path: ${{ runner.temp }}/fastlane_output/*.[iz][pi][ap] # Match .ipa and .zip files
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0
     #   env:

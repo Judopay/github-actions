@@ -11,6 +11,10 @@ on:
         description: Label for the Firebase test matrix
         required: true
         type: string
+      target_directory:
+        description: The directory which sample app files will be restored to
+        required: true
+        type: string
     secrets:
       google_cloud_service_account_key:
         description: JSON key for Google Cloud service account for Firebase authentication
@@ -34,15 +38,14 @@ jobs:
         bundler-cache: true
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
-    - name: Download Instrumentation Test Packages
+    - name: Restore Instrumentation Test Packages & Sample Apps
       run: |
-        mkdir -p ${{ runner.temp }}/fastlane_output
-        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/ios-instrumention-test-packages/* ${{ runner.temp }}/fastlane_output
+        mkdir -p ${{ inputs.target_directory }}
+        gsutil cp -r gs://${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}/* ${{ inputs.target_directory }}
       shell: bash
     - name: Run Instrumentation Tests on Firebase
       uses: maierj/fastlane-action@v3.1.0
       env:
-        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         FIREBASE_MATRIX_LABEL: ${{ inputs.firebase_matrix_label }}
         FIREBASE_TEST_RESULTS_BUCKET: ${{ vars.firebase_results_bucket }}
       with:
