@@ -66,6 +66,8 @@ jobs:
         JUDO_API_ID: ${{ secrets.mobile_testing_judo_id }}
         JUDO_API_SECRET: ${{ secrets.mobile_testing_judo_api_secret }}
         JUDO_API_TOKEN: ${{ secrets.mobile_testing_judo_api_token }}
+        JUDOKIT_PROD_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_judokit_prod_sample_app_google_services_json_base64 }}
+        JUDOKIT_STAGING_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_judokit_staging_sample_app_google_services_json_base64 }}
         RAVELIN_MOCK_SERVER_URL: ${{ secrets.mobile_testing_ravelin_mock_server_url }}
         RSA_PUBLIC_KEY: ${{ secrets.mobile_testing_ravelin_public_key }}
         STAGING_HOST_NAME: ${{ secrets.staging_domain }}
