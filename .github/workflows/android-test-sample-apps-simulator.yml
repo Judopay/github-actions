@@ -1,0 +1,65 @@
+name: Android Test Sample Apps on Simulator
+on:
+  workflow_call:
+    inputs:
+      api-level:
+        required: true
+        type: number
+jobs:
+  build_and_test:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        cache: yarn
+        node-version-file: .nvmrc
+    - name: Enable KVM # Required for Android Emulator
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+    - name: Gradle cache
+      uses: gradle/actions/setup-gradle@v4
+    - name: Restore AVD Cache
+      uses: actions/cache@v4
+      id: avd-cache
+      with:
+        path: |
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: avd-${{ inputs.api-level }}
+    - name: Create AVD
+      if: steps.avd-cache.outputs.cache-hit != 'true'
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        arch: x86_64
+        disable-animations: false
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        force-avd-creation: false
+        profile: Pixel 3
+        ram-size: 4096M
+        script: echo "Generated AVD snapshot for caching."
+        target: google_atd
+    - name: Configure AVD Screen Size
+      run: |
+        echo "hw.lcd.density=440" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
+        echo "hw.lcd.height=2220" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
+        echo "hw.lcd.width=1080" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
+        echo "hw.screen.size=normal" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
+    - name: Run Tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        force-avd-creation: false
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        disable-animations: true
+        script: bundle exec fastlane test_sample_apps platform:android

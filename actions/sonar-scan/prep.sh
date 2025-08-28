@@ -33,6 +33,11 @@ if JACOCO_COVERAGE_FILE="$(find $HOME -type f -name 'jacocoTestReport.xml')" && 
     PARAMS+=(-Dsonar.coverage.jacoco.xmlReportPaths="$JACOCO_COVERAGE_FILE")
 fi
 
+if LCOV_REPORT="$(find $HOME -not -path "./node_modules/*" -name lcov.info)" && [ -n "${LCOV_REPORT}" ]; then
+    echo "Found lcov coverage file at $LCOV_REPORT. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.typescript.lcov.reportPaths="$LCOV_REPORT")
+fi
+
 if [ -d "$HOME/.gradle/caches" ]; then
     echo "Found Gradle cache in $HOME/.gradle/caches. Adding to SonarQube parameters."
     PARAMS+=(-Dsonar.java.libraries="$HOME/.gradle/caches/**/*.jar")

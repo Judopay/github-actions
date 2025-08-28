@@ -1,0 +1,43 @@
+name: ReactNative Build and Test
+on:
+  workflow_call:
+    secrets:
+      sonar_token:
+        required: true
+        description: Token for SonarCloud authentication
+jobs:
+  build_and_test:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        cache: yarn
+        node-version-file: .nvmrc
+    - name: Install Dependencies
+      uses: maierj/fastlane-action@v3.1.0
+      with:
+        lane: install
+    - name: Run Lint
+      uses: maierj/fastlane-action@v3.1.0
+      with:
+        lane: lint
+    - name: Run Build
+      uses: maierj/fastlane-action@v3.1.0
+      with:
+        lane: build
+    - name: Run Tests
+      uses: maierj/fastlane-action@v3.1.0
+      with:
+        lane: test
+    - name: Run Sonar Scan
+      uses: Judopay/github-actions/actions/sonar-scan@master
+      with:
+        sonar-token: ${{ secrets.sonar_token }}

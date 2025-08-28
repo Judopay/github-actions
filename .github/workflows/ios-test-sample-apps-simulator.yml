@@ -1,0 +1,36 @@
+name: iOS Test Sample Apps on Simulator
+on:
+  workflow_call:
+    inputs:
+      api-level:
+        required: true
+        type: number
+jobs:
+  build_and_test:
+    runs-on: macos-15
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      if: ${{ hashFiles('Gemfile.lock') != '' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        cache: yarn
+        node-version-file: .nvmrc
+    - name: Brew Tap
+      run: brew tap wix/brew
+    - name: Brew Install
+      uses: gerlero/brew-install@v1
+      with:
+        packages: applesimutils
+    - name: Run Tests
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+      with:
+        lane: test_sample_apps_simulator
+        options: '{ "platform": "ios"}'
