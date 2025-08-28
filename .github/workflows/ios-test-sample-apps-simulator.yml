@@ -1,10 +1,6 @@
 name: iOS Test Sample Apps on Simulator
 on:
   workflow_call:
-    inputs:
-      api-level:
-        required: true
-        type: number
 jobs:
   build_and_test:
     runs-on: macos-15

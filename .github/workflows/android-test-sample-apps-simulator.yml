@@ -1,10 +1,6 @@
 name: Android Test Sample Apps on Simulator
 on:
   workflow_call:
-    inputs:
-      api-level:
-        required: true
-        type: number
 jobs:
   build_and_test:
     runs-on: ubuntu-24.04
@@ -35,12 +31,12 @@ jobs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-${{ inputs.api-level }}
+        key: avd-34
     - name: Create AVD
       if: steps.avd-cache.outputs.cache-hit != 'true'
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: ${{ inputs.api-level }}
+        api-level: 34
         arch: x86_64
         disable-animations: false
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -58,7 +54,7 @@ jobs:
     - name: Run Tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: ${{ inputs.api-level }}
+        api-level: 34
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
