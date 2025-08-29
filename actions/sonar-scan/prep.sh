@@ -18,6 +18,11 @@ if COMPILATION_DATABASE_DIR="$(find $HOME -type d -name 'compilation_database')"
     
     PARAMS+=(-Dsonar.cfamily.cache.enabled=false)
     PARAMS+=(-Dsonar.cfamily.compile-commands=$COMPILE_COMMANDS_FILE)
+else
+    echo "No compilation database found. Disabling CFamily analysis."
+    PARAMS+=(-Dsonar.c.file.suffixes=-)
+    PARAMS+=(-Dsonar.cpp.file.suffixes=-)
+    PARAMS+=(-Dsonar.objc.file.suffixes=-)
 fi
 
 if XCCOV_RESULTS_DIR="$(find $HOME -type d -regex ".*\.xcresult")" && [ -n "${XCCOV_RESULTS_DIR}" ]; then
