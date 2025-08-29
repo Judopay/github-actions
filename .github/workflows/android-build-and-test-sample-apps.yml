@@ -74,6 +74,7 @@ jobs:
         THREEDS2_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_3ds2_sample_app_google_services_json_base64 }}
       with:
         lane: build_sample_apps
+        options: '{ "platform": "android"}'
     - name: Store Sample Apps
       uses: actions/upload-artifact@v4
       with:

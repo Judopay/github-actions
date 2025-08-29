@@ -60,6 +60,8 @@ jobs:
       uses: maierj/fastlane-action@v3.1.0
       env:
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+      with:
+        lane: build
     - name: Publish
       uses: maierj/fastlane-action@v3.1.0
       env:
