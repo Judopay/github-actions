@@ -59,6 +59,9 @@ jobs:
       with:
         cache: yarn
         node-version-file: .nvmrc
+    - name: Yarn Install
+      if: ${{ hashFiles('yarn.lock') != '' }}
+      run: yarn install --immutable
     - name: Carthage Bootstrap
       if: ${{ hashFiles('Cartfile.resolved') != '' }}
       uses: Judopay/github-actions/actions/carthage-bootstrap@master
