@@ -17,6 +17,9 @@ jobs:
       with:
         cache: yarn
         node-version-file: .nvmrc
+    - name: Yarn Install
+      if: ${{ hashFiles('yarn.lock') != '' }}
+      run: yarn install --immutable
     - name: Brew Tap
       run: brew tap wix/brew
     - name: Brew Install

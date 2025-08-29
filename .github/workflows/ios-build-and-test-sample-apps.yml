@@ -93,7 +93,7 @@ jobs:
     - name: Store Sample Apps
       uses: actions/upload-artifact@v4
       with:
-        name: sample-apps
+        name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output/*.[iz][pi][ap] # Match .ipa and .zip files
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0

@@ -17,6 +17,9 @@ jobs:
       with:
         cache: yarn
         node-version-file: .nvmrc
+    - name: Yarn Install
+      if: ${{ hashFiles('yarn.lock') != '' }}
+      run: yarn install --immutable
     - name: Enable KVM # Required for Android Emulator
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
