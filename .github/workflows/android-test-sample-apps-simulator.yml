@@ -50,6 +50,7 @@ jobs:
         target: google_atd
     - name: Configure AVD Screen Size
       run: |
+        mkdir -p ~/.android/avd/Pixel_3_API_34_x86_64.avd
         echo "hw.lcd.density=440" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
         echo "hw.lcd.height=2220" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
         echo "hw.lcd.width=1080" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini

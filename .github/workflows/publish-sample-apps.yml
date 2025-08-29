@@ -23,9 +23,10 @@ jobs:
       with:
         bundler-cache: true
     - name: Restore Sample Apps
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
-        name: sample-apps
+        artifact-ids: android-sample-apps,ios-sample-apps
+        merge-multiple: true
         path: ${{ runner.temp }}/fastlane_output
     - name: Store Sample Apps in GCS
       uses: google-github-actions/upload-cloud-storage@v2
