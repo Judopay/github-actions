@@ -30,7 +30,7 @@ runs:
     shell: bash
   - name: Sonar Scan Pull Request
     if: github.event_name == 'pull_request'
-    uses: SonarSource/sonarqube-scan-action@v4
+    uses: SonarSource/sonarqube-scan-action@v5
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
