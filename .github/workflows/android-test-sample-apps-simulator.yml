@@ -41,7 +41,7 @@ jobs:
       with:
         api-level: 34
         arch: x86_64
-        disable-animations: false
+        disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         force-avd-creation: false
         profile: pixel_3
@@ -59,7 +59,9 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 34
-        force-avd-creation: false
-        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        arch: x86_64
         disable-animations: true
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        force-avd-creation: false
         script: bundle exec fastlane test_sample_apps platform:android
+        target: google_atd
