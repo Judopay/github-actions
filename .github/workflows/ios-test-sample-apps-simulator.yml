@@ -28,6 +28,8 @@ jobs:
         packages: applesimutils
     - name: Restore Sample Apps
       uses: actions/download-artifact@v5
+      env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output
