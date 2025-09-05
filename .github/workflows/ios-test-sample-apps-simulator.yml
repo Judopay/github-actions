@@ -28,14 +28,13 @@ jobs:
         packages: applesimutils
     - name: Restore Sample Apps
       uses: actions/download-artifact@v5
-      env:
-        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output
     - name: Run Tests
       uses: maierj/fastlane-action@v3.1.0
       env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
         lane: test_sample_apps_simulator

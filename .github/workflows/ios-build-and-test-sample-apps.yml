@@ -90,8 +90,6 @@ jobs:
       with:
         lane: build_sample_apps
         options: '{ "platform": "ios"}'
-    - name: Find .app file
-      run: find $HOME -name "*.app"
     - name: Store Sample Apps
       uses: actions/upload-artifact@v4
       with:
