@@ -56,6 +56,11 @@ jobs:
         echo "hw.lcd.height=2220" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
         echo "hw.lcd.width=1080" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
         echo "hw.screen.size=normal" >> ~/.android/avd/Pixel_3_API_34_x86_64.avd/config.ini
+    - name: Restore Sample Apps
+      uses: actions/download-artifact@v5
+      with:
+        name: android-sample-apps
+        path: ${{ runner.temp }}/fastlane_output
     - name: Run Tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
