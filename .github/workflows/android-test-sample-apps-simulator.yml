@@ -63,5 +63,5 @@ jobs:
         disable-animations: true
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         force-avd-creation: false
-        script: bundle exec fastlane test_sample_apps platform:android
+        script: bundle exec fastlane test_sample_apps_simulator platform:android
         target: google_atd
