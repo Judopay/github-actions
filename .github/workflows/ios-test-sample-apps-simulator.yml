@@ -39,3 +39,5 @@ jobs:
       with:
         lane: test_sample_apps_simulator
         options: '{ "platform": "ios"}'
+    - name: Show Logs
+      run: xcrun simctl spawn booted log show --info --debug --predicate 'processImagePath contains "CoreSimulatorBridge"'
