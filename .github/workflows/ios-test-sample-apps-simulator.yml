@@ -31,6 +31,7 @@ jobs:
       with:
         name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output
+    - uses: valeriangalliat/action-sshd-cloudflared@v4
     - name: Run Tests
       env: 
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
