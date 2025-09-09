@@ -57,11 +57,11 @@ jobs:
       uses: gerlero/brew-install@v1
       with:
         packages: applesimutils
-    - name: Restore Sample Apps
-      uses: actions/download-artifact@v5
-      with:
-        name: ios-sample-apps
-        path: ${{ runner.temp }}/fastlane_output
+    # - name: Restore Sample Apps
+    #   uses: actions/download-artifact@v5
+    #   with:
+    #     name: ios-sample-apps
+    #     path: ${{ runner.temp }}/fastlane_output
     - uses: valeriangalliat/action-sshd-cloudflared@v4
       env:
         AUTHORIZED_KEYS: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMO1rzPAE5E+M3R06HI2AMovE4hMJExbKMSDhXRg7jM4 test@testenv
