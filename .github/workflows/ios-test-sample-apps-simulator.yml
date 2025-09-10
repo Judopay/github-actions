@@ -31,21 +31,11 @@ jobs:
       with:
         name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output
-    - uses: valeriangalliat/action-sshd-cloudflared@v4
-      env:
-        AUTHORIZED_KEYS: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMO1rzPAE5E+M3R06HI2AMovE4hMJExbKMSDhXRg7jM4 test@test
     - name: Run Tests
-      env: 
+      uses: maierj/fastlane-action@v3.1.0
+      env:
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
-      run: |
-        bundle exec fastlane test_sample_apps_simulator platform:ios || true
-        xcrun simctl spawn booted log show --info --debug --predicate 'processImagePath contains "CoreSimulatorBridge"'
-    # - name: Run Tests
-    #   uses: maierj/fastlane-action@v3.1.0
-    #   env:
-    #     FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
-    #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
-    #   with:
-    #     lane: test_sample_apps_simulator
-    #     options: '{ "platform": "ios"}'
+      with:
+        lane: test_sample_apps_simulator
+        options: '{ "platform": "ios"}'
