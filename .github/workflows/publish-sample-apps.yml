@@ -25,7 +25,6 @@ jobs:
     - name: Restore Sample Apps
       uses: actions/download-artifact@v5
       with:
-        artifact-ids: android-sample-apps,ios-sample-apps
         merge-multiple: true
         path: ${{ runner.temp }}/fastlane_output
     - name: Store Sample Apps in GCS
