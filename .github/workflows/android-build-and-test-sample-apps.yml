@@ -2,10 +2,10 @@ name: Android Build and Test Sample Apps
 on:
   workflow_call:
     secrets:
-      fabrick_3ds_api_secret:
+      fabrick_3ds_judo_api_secret:
         required: true
         description: Judo API secret for Fabrick 3DS testing
-      fabrick_3ds_api_token:
+      fabrick_3ds_judo_api_token:
         required: true
         description: Judo API token for Fabrick 3DS testing
       fabrick_3ds_judo_id:
@@ -80,8 +80,8 @@ jobs:
         ANDROID_SIGNING_CERTIFICATE: ${{ secrets.android_app_signing_certificate_base64 }}
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.android_app_signing_keystore_password }}
         DEVICEDNA_SAMPLE_APP_GOOGLE_SERVICES_JSON_B64: ${{ secrets.android_devicedna_sample_app_google_services_json_base64 }}
-        FABRICK3DS_API_SECRET: ${{ secrets.fabrick_3ds_api_secret }}
-        FABRICK3DS_API_TOKEN: ${{ secrets.fabrick_3ds_api_token }}
+        FABRICK3DS_API_SECRET: ${{ secrets.fabrick_3ds_judo_api_secret }}
+        FABRICK3DS_API_TOKEN: ${{ secrets.fabrick_3ds_judo_api_token }}
         FABRICK3DS_JUDO_ID: ${{ secrets.fabrick_3ds_judo_id }}
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
         JUDO_API_ID: ${{ secrets.mobile_testing_judo_id }}
