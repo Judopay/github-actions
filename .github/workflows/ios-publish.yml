@@ -5,9 +5,6 @@ on:
       cocoapods_trunk_token:
         required: true
         description: Token for CocoaPods trunk authentication for publishing pods
-      github_token:
-        required: true
-        description: GitHub token used by Carthage to access private dependencies
       ios_app_store_connect_api_key:
         required: true
         description: API key for App Store Connect for code signing
