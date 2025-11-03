@@ -35,6 +35,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Pod Install
+      if: ${{ hashFiles('**/Podfile.lock') != '' }}
       uses: Judopay/github-actions/actions/pod-install@master
     - name: Brew Install
       uses: gerlero/brew-install@v1
