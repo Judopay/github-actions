@@ -67,4 +67,5 @@ jobs:
         GIT_TAG: ${{ github.ref_name }}
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         lane: publish
