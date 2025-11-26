@@ -66,6 +66,6 @@ jobs:
         COCOAPODS_TRUNK_TOKEN: ${{ secrets.cocoapods_trunk_token }}
         GIT_TAG: ${{ github.ref_name }}
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
         lane: publish
