@@ -14,6 +14,9 @@ on:
       ssh_key_github:
         required: true
         description: SSH key for accessing Github repositories
+      personal_access_token_github:
+        required: true
+        description: Personal Access Token for Github for accessing other private repositories
 env:
   APP_STORE_CONNECT_API_KEY_IS_KEY_CONTENT_BASE64: true
   APP_STORE_CONNECT_API_KEY_ISSUER_ID: 69a6de7a-a6bf-47e3-e053-5b8c7c11a4d1
@@ -25,8 +28,6 @@ env:
 jobs:
   build:
     runs-on: macos-15
-    permissions:
-      contents: write
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -68,6 +69,6 @@ jobs:
         COCOAPODS_TRUNK_TOKEN: ${{ secrets.cocoapods_trunk_token }}
         GIT_TAG: ${{ github.ref_name }}
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.personal_access_token_github }}
       with:
         lane: publish
