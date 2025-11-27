@@ -53,6 +53,10 @@ jobs:
     - name: Pod Install
       if: ${{ hashFiles('**/Podfile.lock') != '' }}
       uses: Judopay/github-actions/actions/pod-install@master
+    - name: Brew Install
+      uses: gerlero/brew-install@v1
+      with:
+        packages: clang-format
     - name: Install Github CLI
       uses: tecolicom/actions-use-homebrew-tools@v1
       with:
