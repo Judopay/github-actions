@@ -107,6 +107,12 @@ jobs:
       with:
         name: ios-sample-apps
         path: ${{ runner.temp }}/fastlane_output/**/*.[aiz][pi][ap] # Match .app, .ipa and .zip files
+    - name: Store XCResult File on Error
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: xcresult
+        path: ${{ runner.temp }}/fastlane_output/**/*.xcresult
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0
     #   env:
