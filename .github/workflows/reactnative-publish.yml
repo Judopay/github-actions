@@ -32,6 +32,9 @@ jobs:
       uses: maierj/fastlane-action@v3.1.0
       with:
         lane: build
+    - name: Show npm version
+      run: npm --version
+      shell: bash
     - name: Publish
       uses: maierj/fastlane-action@v3.1.0
       with:
