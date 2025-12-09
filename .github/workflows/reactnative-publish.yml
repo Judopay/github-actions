@@ -1,6 +1,9 @@
 name: ReactNative Publish
 on:
   workflow_call:
+permissions:
+  id-token: write  # Required for NPM trusted publisher authentication
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-24.04
