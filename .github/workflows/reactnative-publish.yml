@@ -1,13 +1,6 @@
 name: ReactNative Publish
 on:
   workflow_call:
-    secrets:
-      npm_token:
-        required: true
-        description: Token for authentication to NPM used for publishing the package
-permissions:
-  id-token: write  # Required for NPM trusted publisher authentication
-  contents: read
 jobs:
   build:
     runs-on: ubuntu-24.04
