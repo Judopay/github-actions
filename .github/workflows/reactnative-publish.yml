@@ -21,7 +21,7 @@ jobs:
         cache: yarn
         node-version-file: .nvmrc
     - name: Update npm
-      run: yarn install -g npm@latest # Ensure npm 11.5.1 or later is installed for trusted publisher support
+      run: npm install -g npm@latest # Ensure npm 11.5.1 or later is installed for trusted publisher support
     - name: Install Dependencies
       uses: maierj/fastlane-action@v3.1.0
       with:
@@ -31,4 +31,7 @@ jobs:
       with:
         lane: build
     - name: Publish
-      run: npm publish
+      run: |
+        yarn clean
+        yarn prepare
+        npm publish
