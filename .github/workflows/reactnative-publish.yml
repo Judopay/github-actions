@@ -1,11 +1,11 @@
 name: ReactNative Publish
 on:
   workflow_call:
-permissions:
-  id-token: write  # Required for NPM trusted publisher authentication
-  contents: read
 jobs:
-  build:
+  publish:
+    permissions:
+      id-token: write  # Required for NPM trusted publisher authentication
+      contents: read
     runs-on: ubuntu-24.04
     steps:
     - name: Checkout Code
@@ -21,7 +21,7 @@ jobs:
         cache: yarn
         node-version-file: .nvmrc
     - name: Update npm
-      run: npm install -g npm@latest # Ensure npm 11.5.1 or later is installed for trusted publisher support
+      run: yarn install -g npm@latest # Ensure npm 11.5.1 or later is installed for trusted publisher support
     - name: Install Dependencies
       uses: maierj/fastlane-action@v3.1.0
       with:
@@ -31,8 +31,4 @@ jobs:
       with:
         lane: build
     - name: Publish
-      uses: maierj/fastlane-action@v3.1.0
-      env:
-        NPM_CONFIG_PROVENANCE: true
-      with:
-        lane: publish
+      run: npm publish
