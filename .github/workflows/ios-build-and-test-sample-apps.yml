@@ -43,8 +43,12 @@ on:
         description: Staging environment domain name for mobile testing
 jobs:
   build_and_test:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
+    - name: Set XCode Version
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '26.2'
     - name: Checkout Code
       uses: actions/checkout@v4
     - name: Set up SSH Key
