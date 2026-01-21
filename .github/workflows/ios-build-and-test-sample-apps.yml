@@ -103,7 +103,6 @@ jobs:
         RSA_PUBLIC_KEY: ${{ secrets.mobile_testing_ravelin_public_key }}
         STAGING_HOST_NAME: ${{ secrets.staging_domain }}
         XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
-        XCODE_BUILDLOG_PATH: ${{ runner.temp }}/xcode/buildlogs/
       with:
         lane: build_sample_apps
         options: '{ "platform": "ios"}'
@@ -117,7 +116,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
-        path: ${{ runner.temp }}/xcode/buildlogs/
+        path: ~/Library/Logs/scan
     # - name: Run Tests
     #   uses: maierj/fastlane-action@v3.1.0
     #   env:
@@ -130,4 +129,5 @@ jobs:
     #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
     #   with:
     #     lane: test_sample_apps_simulator
+
 
