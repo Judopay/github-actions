@@ -97,7 +97,7 @@ jobs:
         lane: build_sample_apps
         options: '{ "platform": "android"}'
     - name: Store Sample Apps
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: android-sample-apps
         path: '${{ runner.temp }}/fastlane_output/*.apk'
