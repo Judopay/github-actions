@@ -26,7 +26,6 @@ else
 fi
 
 if XCCOV_RESULTS_DIR="$(find $HOME -type d -regex ".*\.xcresult")" && [ -n "${XCCOV_RESULTS_DIR}" ]; then
-    GENERIC_COVERAGE_FILE="$OUTPUT_DIR/sonarqube-generic-coverage.xml"
     echo "Found XCCov coverage files in $XCCOV_RESULTS_DIR. Converting to SonarQube format and saving to sonarqube-generic-coverage.xml."
     chmod +x $XCCOV_CONVERTER_BINARY
     $XCCOV_CONVERTER_BINARY $XCCOV_RESULTS_DIR/ > "sonarqube-generic-coverage.xml"
