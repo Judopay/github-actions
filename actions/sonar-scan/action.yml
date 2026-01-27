@@ -16,7 +16,7 @@ runs:
     uses: ethanjli/cached-download-action@v0.1.3
     id: install-xccov-converter
     with:
-      url: https://raw.githubusercontent.com/SonarSource/sonar-scanning-examples/1dd2b1b4736cc3be4d714770d469ed7c59deec1b/swift-coverage/swift-coverage-example/xccov-to-sonarqube-generic.sh
+      url: https://raw.githubusercontent.com/SonarSource/sonar-scanning-examples/refs/heads/master/swift-coverage/swift-coverage-example/xccov-to-sonarqube-generic.sh
       destination: ${{ runner.temp }}/sonar/xccov-to-sonarqube-generic.sh
   - name: Prepare for Sonar Scan
     env:
@@ -30,7 +30,7 @@ runs:
     shell: bash
   - name: Sonar Scan Pull Request
     if: github.event_name == 'pull_request'
-    uses: SonarSource/sonarqube-scan-action@v5
+    uses: SonarSource/sonarqube-scan-action@v7
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
@@ -43,7 +43,7 @@ runs:
         -Dsonar.pullrequest.provider=GitHub
   - name: Sonar Scan Main Branch
     if: github.event_name == 'push' && github.ref_name == 'master'
-    uses: SonarSource/sonarqube-scan-action@v4
+    uses: SonarSource/sonarqube-scan-action@v7
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
