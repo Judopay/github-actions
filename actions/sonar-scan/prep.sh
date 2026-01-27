@@ -27,10 +27,14 @@ fi
 
 if XCCOV_RESULTS_DIR="$(find $HOME -type d -regex ".*\.xcresult")" && [ -n "${XCCOV_RESULTS_DIR}" ]; then
     GENERIC_COVERAGE_FILE="$OUTPUT_DIR/sonarqube-generic-coverage.xml"
-    echo "Found XCCov coverage files in $XCCOV_RESULTS_DIR. Converting to SonarQube format and saving to $GENERIC_COVERAGE_FILE."
+    echo "Found XCCov coverage files in $XCCOV_RESULTS_DIR. Converting to SonarQube format and saving to sonarqube-generic-coverage.xml."
     chmod +x $XCCOV_CONVERTER_BINARY
-    $XCCOV_CONVERTER_BINARY $XCCOV_RESULTS_DIR/ > $GENERIC_COVERAGE_FILE
-    PARAMS+=(-Dsonar.coverageReportPaths=$GENERIC_COVERAGE_FILE)
+    $XCCOV_CONVERTER_BINARY $XCCOV_RESULTS_DIR/ > "sonarqube-generic-coverage.xml"
+fi
+
+if GENERIC_COVERAGE_FILE="$(find $HOME -type f -name 'sonarqube-generic-coverage.xml')" && [ -n "${GENERIC_COVERAGE_FILE}" ]; then
+    echo "Found generic coverage file at $GENERIC_COVERAGE_FILE. Adding to SonarQube parameters."
+    PARAMS+=(-Dsonar.coverageReportPaths="$GENERIC_COVERAGE_FILE")
 fi
 
 if JACOCO_COVERAGE_FILE="$(find $HOME -type f -name 'jacocoTestReport.xml')" && [ -n "${JACOCO_COVERAGE_FILE}" ]; then
