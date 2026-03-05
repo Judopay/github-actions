@@ -31,7 +31,7 @@ if XCCOV_RESULTS_DIR="$(find $HOME -type d -regex ".*\.xcresult")" && [ -n "${XC
     $XCCOV_CONVERTER_BINARY $XCCOV_RESULTS_DIR/ > "sonarqube-generic-coverage.xml"
 fi
 
-if GENERIC_COVERAGE_FILE="$(find $HOME -type f -name 'sonarqube-generic-coverage.xml')" && [ -n "${GENERIC_COVERAGE_FILE}" ]; then
+if GENERIC_COVERAGE_FILE="$(find $HOME -not -path "*/vendor/*" -type f -name 'sonarqube-generic-coverage.xml')" && [ -n "${GENERIC_COVERAGE_FILE}" ]; then
     echo "Found generic coverage file at $GENERIC_COVERAGE_FILE. Adding to SonarQube parameters."
     PARAMS+=(-Dsonar.coverageReportPaths="$GENERIC_COVERAGE_FILE")
 fi
