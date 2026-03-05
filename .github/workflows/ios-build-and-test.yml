@@ -70,4 +70,3 @@ jobs:
       uses: Judopay/github-actions/actions/sonar-scan@master
       with:
         sonar-token: ${{ secrets.sonar_token }}
-        uses-xccov: "true"
