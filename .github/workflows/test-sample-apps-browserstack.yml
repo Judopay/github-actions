@@ -1,6 +1,12 @@
 name: Test Sample Apps with BrowserStack
 on:
   workflow_call:
+    inputs:
+      fastlane_options:
+        description: Custom parameters as a JSON string passed to Fastlane
+        required: false
+        type: string
+        default: '{}'
     secrets:
       browserstack_username:
         description: The user to authenticate with BrowserStack
@@ -43,3 +49,4 @@ jobs:
         FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
       with:
         lane: test_sample_apps_browserstack
+        options: ${{ inputs.fastlane_options }}
