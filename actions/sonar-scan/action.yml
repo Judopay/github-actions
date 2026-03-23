@@ -4,6 +4,10 @@ inputs:
   sonar-token:
     description: 'Token to authenticate with SonarCloud'
     required: true
+  dotnet-project:
+    description: 'Enable .NET project scanning (default: false)'
+    default: 'false'
+    required: false
 runs:
   using: composite
   steps:
@@ -17,7 +21,7 @@ runs:
     run: ${{ github.action_path }}/prep.sh
     shell: bash
   - name: Sonar Scan Pull Request
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && inputs.dotnet-project == 'false'
     uses: SonarSource/sonarqube-scan-action@v7
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
@@ -30,10 +34,23 @@ runs:
         -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
         -Dsonar.pullrequest.provider=GitHub
   - name: Sonar Scan Main Branch
-    if: github.event_name == 'push' && github.ref_name == 'master'
+    if: github.event_name == 'push' && github.ref_name == 'master' && inputs.dotnet-project == 'false'
     uses: SonarSource/sonarqube-scan-action@v7
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
       args: >
         ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
+  - name: Sonar Scan Pull Request .NET
+    if: github.event_name == 'pull_request' && inputs.dotnet-project == 'true'
+    uses: highbyte/sonarscan-dotnet@v2.5.0
+    env:
+      SONAR_TOKEN: ${{ inputs.sonar-token }}
+    with:
+      sonarProjectKey: ${{ steps.sonar-prep.outputs.SONAR_PROJECT_KEY }}
+      sonarProjectName: ${{ steps.sonar-prep.outputs.SONAR_PROJECT_KEY }}
+      sonarOrganization: ${{ steps.sonar-prep.outputs.SONAR_ORGANIZATION }}
+      dotnetBuildArguments: -c Release
+      dotnetTestArguments: /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+      sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+    

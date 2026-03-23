@@ -1,0 +1,35 @@
+name: .NET Build and Test
+on:
+  workflow_call:
+    inputs:
+      appsettings_json_path:
+        required: false
+        type: string
+        description: Path to appsettings.json file in the repository
+    secrets:
+      sonar_token:
+        required: true
+        description: Token for SonarCloud authentication
+      appsettings_json_b64:
+        required: false
+        description: Base64-encoded appsettings.json content for tests
+jobs:
+  build_and_test:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Setup dotnet 
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "8.0.x"
+        cache: true
+    - name: Inject Application Settings
+      if: inputs.appsettings_json_path != ''
+      run: echo "${{ secrets.appsettings_json_b64 }}" | base64 -d > ${{ github.workspace }}/${{ inputs.appsettings_json_path }}
+      shell: bash
+    - name: Run Sonar Scan
+      uses: Judopay/github-actions/actions/sonar-scan@master
+      with:
+        sonar-token: ${{ secrets.sonar_token }}
+        dotnet-project: 'true'

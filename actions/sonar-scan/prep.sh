@@ -2,7 +2,8 @@
 
 mkdir -p $OUTPUT_DIR
 
-PARAMS=(-Dsonar.organization=judopay)
+ORGANIZATION="judopay"
+PARAMS=(-Dsonar.organization=$ORGANIZATION)
 PARAMS+=(-Dproject.settings=.sonarscan)
 PARAMS+=(-Dsonar.sources=$SONAR_SOURCES)
 
@@ -58,3 +59,5 @@ if ANDROID_LINT_FILE="$(find $HOME -name lint-results-debug.xml)" && [ -n "${AND
 fi
 
 echo "SONAR_ARGS=${PARAMS[@]}" >> $GITHUB_OUTPUT
+echo "SONAR_PROJECT_KEY=$PROJECT_KEY" >> $GITHUB_OUTPUT
+echo "SONAR_ORGANIZATION=$ORGANIZATION" >> $GITHUB_OUTPUT
