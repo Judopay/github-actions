@@ -52,5 +52,5 @@ runs:
       sonarOrganization: ${{ steps.sonar-prep.outputs.SONAR_ORGANIZATION }}
       dotnetBuildArguments: -c Release
       dotnetTestArguments: /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-      sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      sonarBeginArguments: /d:project.settings=.sonarscan /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
     
