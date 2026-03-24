@@ -25,11 +25,14 @@ jobs:
         dotnet-version: "8.0.x"
         cache: true
         cache-dependency-path: '**/packages.lock.json'
+    - name: Dotnet Restore
+      run: dotnet restore
+      shell: bash
     - name: Inject Application Settings
       if: inputs.appsettings_json_path != ''
       run: echo "${{ secrets.appsettings_json_b64 }}" | base64 -d > ${{ github.workspace }}/${{ inputs.appsettings_json_path }}
       shell: bash
-    - name: Run Sonar Scan
+    - name: Run Build, Tests and Sonar Scan
       uses: Judopay/github-actions/actions/sonar-scan@master
       with:
         sonar-token: ${{ secrets.sonar_token }}
