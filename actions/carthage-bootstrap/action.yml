@@ -16,7 +16,7 @@ runs:
   - name: Carthage Bootstrap
     env:
       PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
-      GITHUB_TOKEN: ${{ inputs.github-token }}
+      GITHUB_ACCESS_TOKEN: ${{ inputs.github-token }}
     if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
     run: carthage bootstrap --platform ios --use-xcframeworks --cache-builds --verbose
     shell: bash
