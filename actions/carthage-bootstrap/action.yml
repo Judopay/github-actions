@@ -22,7 +22,8 @@ runs:
       curl https://raw.githubusercontent.com/Judopay/DeviceDNA-iOS/master/DeviceDNA.json
       curl https://raw.githubusercontent.com/Judopay/Judo3DS2-iOS/master/Judo3DS2_iOS.json
       curl https://raw.githubusercontent.com/unravelin/ravelin-encrypt-ios-xcframework-distribution/main/RavelinEncrypt.json
-      carthage bootstrap --platform ios --use-xcframeworks --cache-builds --verbose
+      carthage version
+      carthage bootstrap --platform ios --use-xcframeworks --cache-builds
     shell: bash
   - name: Store Pod Cache
     if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
