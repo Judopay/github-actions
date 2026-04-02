@@ -18,12 +18,7 @@ runs:
       PODFILE_LOCKS: ${{ steps.scan-for-podfiles.outputs.PODFILE_LOCKS }}
       GITHUB_ACCESS_TOKEN: ${{ inputs.github-token }}
     if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
-    run: |
-      curl https://raw.githubusercontent.com/Judopay/DeviceDNA-iOS/master/DeviceDNA.json
-      curl https://raw.githubusercontent.com/Judopay/Judo3DS2-iOS/master/Judo3DS2_iOS.json
-      curl https://raw.githubusercontent.com/unravelin/ravelin-encrypt-ios-xcframework-distribution/main/RavelinEncrypt.json
-      carthage version
-      carthage bootstrap --platform ios --use-xcframeworks --cache-builds
+    run: carthage bootstrap --platform ios --use-xcframeworks --cache-builds
     shell: bash
   - name: Store Pod Cache
     if: ${{ steps.restore-cache.outputs.cache-hit != 'true' }}
