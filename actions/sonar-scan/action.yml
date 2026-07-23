@@ -43,7 +43,7 @@ runs:
         ${{ steps.sonar-prep.outputs.SONAR_ARGS }}
   - name: Sonar Scan Pull Request .NET
     if: github.event_name == 'pull_request' && inputs.dotnet-project == 'true'
-    uses: highbyte/sonarscan-dotnet@v2.5.0
+    uses: highbyte/sonarscan-dotnet@v2.5.1
     env:
       SONAR_TOKEN: ${{ inputs.sonar-token }}
     with:
