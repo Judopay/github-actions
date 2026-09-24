@@ -27,7 +27,7 @@ env:
   MATCH_PASSWORD: ${{ secrets.match_password }}
 jobs:
   build:
-    runs-on: macos-27
+    runs-on: xcode-27
     steps:
     - name: Set XCode Version
       uses: maxim-lobanov/setup-xcode@v1
