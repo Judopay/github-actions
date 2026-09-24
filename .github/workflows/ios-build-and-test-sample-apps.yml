@@ -62,10 +62,7 @@ jobs:
         credentials_json: ${{ secrets.google_cloud_service_account_key }}
         project_id: ${{ vars.firebase_gcp_project }}
     - name: Set up Ruby
-      if: ${{ hashFiles('Gemfile.lock') != '' }}
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
+      uses: Judopay/github-actions/actions/setup-ruby@master
     - name: Set up Node.js
       if: ${{ hashFiles('.nvmrc') != '' }}
       uses: actions/setup-node@v3
@@ -129,5 +126,3 @@ jobs:
     #     XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
     #   with:
     #     lane: test_sample_apps_simulator
-
-

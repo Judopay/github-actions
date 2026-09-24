@@ -21,10 +21,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     - name: Set up Ruby
-      if: ${{ hashFiles('Gemfile.lock') != '' }}
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
+      uses: Judopay/github-actions/actions/setup-ruby@master
     - name: Run Build
       uses: maierj/fastlane-action@v3.1.0
       with:

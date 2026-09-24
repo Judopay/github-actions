@@ -29,10 +29,7 @@ jobs:
       with:
         ssh-private-key-base64: ${{ secrets.ssh_key_github }}
     - name: Set up Ruby
-      if: ${{ hashFiles('Gemfile.lock') != '' }}
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
+      uses: Judopay/github-actions/actions/setup-ruby@master
     - name: Carthage Bootstrap
       if: ${{ hashFiles('Cartfile.resolved') != '' }}
       uses: Judopay/github-actions/actions/carthage-bootstrap@master
