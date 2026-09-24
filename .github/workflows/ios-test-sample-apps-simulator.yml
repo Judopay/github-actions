@@ -3,7 +3,7 @@ on:
   workflow_call:
 jobs:
   build_and_test:
-    runs-on: macos-26
+    runs-on: macos-27
     steps:
     - name: Set XCode Version
       uses: maxim-lobanov/setup-xcode@v1
