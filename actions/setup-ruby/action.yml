@@ -1,0 +1,22 @@
+name: 'judopay/setup-ruby'
+description: 'Set up Ruby and install gems with Bundler, keying the gem cache on the Bundler version in Gemfile.lock'
+runs:
+  using: composite
+  steps:
+  # ruby/setup-ruby falls back to any cache with a matching key prefix, so
+  # without this a Bundler upgrade reuses gems installed by the old Bundler.
+  # Including the locked Bundler version in the prefix forces a clean install.
+  - name: Get Bundler Version
+    id: bundler-version
+    if: ${{ hashFiles('Gemfile.lock') != '' }}
+    run: echo "version=$(grep -A1 'BUNDLED WITH' Gemfile.lock | tail -1 | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+    shell: bash
+  - name: Set up Ruby
+    if: ${{ hashFiles('Gemfile.lock') != '' }}
+    uses: ruby/setup-ruby@v1
+    with:
+      bundler-cache: true
+      cache-version: bundler-${{ steps.bundler-version.outputs.version }}
+branding:
+  icon: package
+  color: red
