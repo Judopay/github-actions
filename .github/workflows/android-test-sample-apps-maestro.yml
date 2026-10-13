@@ -7,11 +7,21 @@ on:
         required: false
         type: string
         default: com.judokit.android.examples
+      api_level:
+        description: Android API level to run the tests on
+        required: false
+        type: number
+        default: 36
       app_file:
         description: Sample app to fetch from the results bucket
         required: false
         type: string
         default: judokit-android-examples-staging-release.apk
+      device_profile:
+        description: Emulator hardware profile, which also sets the screen
+        required: false
+        type: string
+        default: pixel_9
       include_tags:
         description: Maestro tags to run, comma separated. Empty runs every flow.
         required: false
@@ -49,7 +59,7 @@ on:
         required: true
         description: SSH key for accessing Github repositories
 env:
-  AVD_NAME: Pixel_3_API_34_x86_64
+  AVD_NAME: maestro_test_avd
   REPORT_DIR: ${{ github.workspace }}/reports
 jobs:
   maestro_tests:
@@ -97,30 +107,21 @@ jobs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-34
+        key: avd-${{ inputs.api_level }}-${{ inputs.device_profile }}
     - name: Create AVD
       if: steps.avd-cache.outputs.cache-hit != 'true'
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 34
+        api-level: ${{ inputs.api_level }}
         arch: x86_64
         avd-name: ${{ env.AVD_NAME }}
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         force-avd-creation: false
-        profile: pixel_3
+        profile: ${{ inputs.device_profile }}
         ram-size: 4096M
         script: echo "Generated AVD snapshot for caching."
         target: google_atd
-    - name: Configure AVD Screen Size
-      run: |
-        mkdir -p ~/.android/avd/${{ env.AVD_NAME }}.avd
-        {
-          echo "hw.lcd.density=440"
-          echo "hw.lcd.height=2220"
-          echo "hw.lcd.width=1080"
-          echo "hw.screen.size=normal"
-        } >> ~/.android/avd/${{ env.AVD_NAME }}.avd/config.ini
     - name: Run Maestro Tests
       uses: reactivecircus/android-emulator-runner@v2
       env:
@@ -128,13 +129,13 @@ jobs:
         EXCLUDE_TAGS: ${{ inputs.exclude_tags }}
         INCLUDE_TAGS: ${{ inputs.include_tags }}
       with:
-        api-level: 34
+        api-level: ${{ inputs.api_level }}
         arch: x86_64
         avd-name: ${{ env.AVD_NAME }}
         disable-animations: true
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         force-avd-creation: false
-        profile: pixel_3
+        profile: ${{ inputs.device_profile }}
         ram-size: 4096M
         target: google_atd
         script: |
