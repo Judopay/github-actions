@@ -1,0 +1,161 @@
+name: Android Test Sample Apps with Maestro
+on:
+  workflow_call:
+    inputs:
+      app_id:
+        description: Bundle ID of the sample app under test
+        required: false
+        type: string
+        default: com.judokit.android.examples
+      app_file:
+        description: Sample app to fetch from the results bucket
+        required: false
+        type: string
+        default: judokit-android-examples-staging-release.apk
+      include_tags:
+        description: Maestro tags to run, comma separated. Empty runs every flow.
+        required: false
+        type: string
+        default: default
+      exclude_tags:
+        description: Maestro tags to skip, comma separated
+        required: false
+        type: string
+        default: ios_only,objc_only
+      maestro_runner_version:
+        description: Version of maestro-runner to install
+        required: false
+        type: string
+        default: 1.1.28
+      tests_ref:
+        description: Ref of Judopay/e2e-tests-maestro to run
+        required: false
+        type: string
+        default: master
+    secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for GCS authentication
+      mobile_testing_judo_api_secret:
+        required: true
+        description: API secret the tests authenticate with
+      mobile_testing_judo_api_token:
+        required: true
+        description: API token the tests authenticate with
+      mobile_testing_judo_id:
+        required: true
+        description: Judo ID the tests transact against
+      ssh_key_github:
+        required: true
+        description: SSH key for accessing Github repositories
+env:
+  AVD_NAME: Pixel_3_API_34_x86_64
+  REPORT_DIR: ${{ github.workspace }}/reports
+jobs:
+  maestro_tests:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Set up SSH Key
+      uses: Judopay/github-actions/actions/ssh-agent@master
+      with:
+        ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    # The tests live in their own private repository rather than alongside the SDK.
+    - name: Checkout Maestro Tests
+      run: git clone --depth 1 --branch "${{ inputs.tests_ref }}" git@github.com:Judopay/e2e-tests-maestro.git .
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Install Maestro Runner
+      run: npm install --global "maestro-runner@${{ inputs.maestro_runner_version }}"
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_gcp_project }}
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    - name: Restore Sample App
+      run: gcloud storage cp "gs://${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}/${{ inputs.app_file }}" "${{ runner.temp }}/sample-app.apk"
+    # push_configs.sh reads .env and writes the credentials into configs/*.json before pushing them to the device.
+    - name: Write Test Environment
+      env:
+        API_SECRET: ${{ secrets.mobile_testing_judo_api_secret }}
+        API_TOKEN: ${{ secrets.mobile_testing_judo_api_token }}
+        JUDO_ID: ${{ secrets.mobile_testing_judo_id }}
+      run: printf 'JUDO_ID=%s\nAPI_TOKEN=%s\nAPI_SECRET=%s\n' "$JUDO_ID" "$API_TOKEN" "$API_SECRET" > .env
+    - name: Enable KVM # Required for Android Emulator
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+    - name: Restore AVD Cache
+      uses: actions/cache@v4
+      id: avd-cache
+      with:
+        path: |
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: avd-34
+    - name: Create AVD
+      if: steps.avd-cache.outputs.cache-hit != 'true'
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 34
+        arch: x86_64
+        avd-name: ${{ env.AVD_NAME }}
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        force-avd-creation: false
+        profile: pixel_3
+        ram-size: 4096M
+        script: echo "Generated AVD snapshot for caching."
+        target: google_atd
+    - name: Configure AVD Screen Size
+      run: |
+        mkdir -p ~/.android/avd/${{ env.AVD_NAME }}.avd
+        {
+          echo "hw.lcd.density=440"
+          echo "hw.lcd.height=2220"
+          echo "hw.lcd.width=1080"
+          echo "hw.screen.size=normal"
+        } >> ~/.android/avd/${{ env.AVD_NAME }}.avd/config.ini
+    - name: Run Maestro Tests
+      uses: reactivecircus/android-emulator-runner@v2
+      env:
+        APP_ID: ${{ inputs.app_id }}
+        EXCLUDE_TAGS: ${{ inputs.exclude_tags }}
+        INCLUDE_TAGS: ${{ inputs.include_tags }}
+      with:
+        api-level: 34
+        arch: x86_64
+        avd-name: ${{ env.AVD_NAME }}
+        disable-animations: true
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        force-avd-creation: false
+        profile: pixel_3
+        ram-size: 4096M
+        target: google_atd
+        script: |
+          set -euo pipefail
+          adb install -r "${{ runner.temp }}/sample-app.apk"
+          ./scripts/push_configs.sh
+          # An empty --include-tags matches no flows, so the flag is omitted to run them all.
+          TAG_ARGS=(--exclude-tags "$EXCLUDE_TAGS")
+          if [ -n "$INCLUDE_TAGS" ]; then TAG_ARGS+=(--include-tags "$INCLUDE_TAGS"); fi
+          maestro-runner -platform android test \
+            --env-file .env \
+            -e APP_ID="$APP_ID" \
+            "${TAG_ARGS[@]}" \
+            --output "$REPORT_DIR" \
+            --flatten \
+            --disable-animations \
+            --record \
+            tests
+    - name: Store Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: maestro-reports
+        path: ${{ env.REPORT_DIR }}
