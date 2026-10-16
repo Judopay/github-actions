@@ -6,7 +6,8 @@ on:
         description: Bundle ID of the sample app under test
         required: false
         type: string
-        default: com.judokit.android.examples
+        # Fastlane appends a .staging suffix, so this has to match the app_file build.
+        default: com.judokit.android.examples.staging
       api_level:
         description: Android API level to run the tests on
         required: false
