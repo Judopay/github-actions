@@ -6,7 +6,8 @@ on:
         description: Bundle ID of the sample app under test
         required: false
         type: string
-        default: com.judokit.android.examples
+        # Fastlane appends a .staging suffix, so this has to match the app_file build.
+        default: com.judokit.android.examples.staging
       api_level:
         description: Android API level to run the tests on
         required: false
@@ -63,7 +64,7 @@ env:
   REPORT_DIR: ${{ github.workspace }}/reports
 jobs:
   maestro_tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
     - name: Set up SSH Key
       uses: Judopay/github-actions/actions/ssh-agent@master
@@ -139,21 +140,10 @@ jobs:
         ram-size: 4096M
         target: google_atd
         script: |
-          set -euo pipefail
           adb install -r "${{ runner.temp }}/sample-app.apk"
           ./scripts/push_configs.sh
-          # An empty --include-tags matches no flows, so the flag is omitted to run them all.
-          TAG_ARGS=(--exclude-tags "$EXCLUDE_TAGS")
-          if [ -n "$INCLUDE_TAGS" ]; then TAG_ARGS+=(--include-tags "$INCLUDE_TAGS"); fi
-          maestro-runner -platform android test \
-            --env-file .env \
-            -e APP_ID="$APP_ID" \
-            "${TAG_ARGS[@]}" \
-            --output "$REPORT_DIR" \
-            --flatten \
-            --disable-animations \
-            --record \
-            tests
+          # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
+          maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --record tests
     - name: Store Reports
       if: always()
       uses: actions/upload-artifact@v4
