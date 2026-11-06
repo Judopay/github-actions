@@ -1,0 +1,143 @@
+name: iOS Test Sample Apps with Maestro
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment the sample app is built for, production or staging
+        required: false
+        type: string
+        default: production
+      exclude_tags:
+        description: Maestro tags to skip, comma separated
+        required: false
+        type: string
+        default: android_only,objc_only
+      flavor:
+        description: Sample app flavor to build, as named in the Fastfile
+        required: false
+        type: string
+        default: obj-c
+      include_tags:
+        description: Maestro tags to run, comma separated. Each runs as its own pass with configs/<tag>.json on the clipboard.
+        required: false
+        type: string
+        default: default
+      maestro_runner_version:
+        description: Version of maestro-runner to install
+        required: false
+        type: string
+        default: 1.1.28
+      simulator_device:
+        description: Simulator device type to run the tests on
+        required: false
+        type: string
+        default: iPhone 17
+      tests_ref:
+        description: Ref of Judopay/e2e-tests-maestro to run
+        required: false
+        type: string
+        default: master
+    secrets:
+      mobile_testing_judo_api_secret:
+        required: true
+        description: API secret the tests authenticate with
+      mobile_testing_judo_api_token:
+        required: true
+        description: API token the tests authenticate with
+      mobile_testing_judo_id:
+        required: true
+        description: Judo ID the tests transact against
+      ssh_key_github:
+        required: true
+        description: SSH key for accessing Github repositories
+      staging_domain:
+        required: false
+        description: Staging environment domain name, needed for staging builds
+jobs:
+  maestro_tests:
+    runs-on: macos-15
+    steps:
+    - name: Set XCode Version
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '26.2'
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up SSH Key
+      uses: Judopay/github-actions/actions/ssh-agent@master
+      with:
+        ssh-private-key-base64: ${{ secrets.ssh_key_github }}
+    # The tests live in their own private repository rather than alongside the SDK.
+    - name: Checkout Maestro Tests
+      env:
+        TESTS_REF: ${{ inputs.tests_ref }}
+      run: git clone --depth 1 --branch "$TESTS_REF" git@github.com:Judopay/e2e-tests-maestro.git "$RUNNER_TEMP/maestro-tests"
+    - name: Set up Ruby
+      uses: Judopay/github-actions/actions/setup-ruby@master
+    - name: Pod Install
+      uses: Judopay/github-actions/actions/pod-install@master
+    # The published .ipa is device signed, so the tests need their own simulator build.
+    - name: Build Sample App
+      uses: maierj/fastlane-action@v3.1.0
+      env:
+        FL_OUTPUT_DIR: ${{ runner.temp }}/fastlane_output
+        STAGING_HOST_NAME: ${{ secrets.staging_domain }}
+        XCODE_DERIVED_DATA_PATH: ${{ runner.temp }}/xcode/derived_data
+      with:
+        lane: build_sample_app_simulator
+        options: '{ "flavor": "${{ inputs.flavor }}", "environment": "${{ inputs.environment }}" }'
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Install Maestro Runner
+      run: npm install --global "maestro-runner@${{ inputs.maestro_runner_version }}"
+    - name: Write Test Environment
+      working-directory: ${{ runner.temp }}/maestro-tests
+      env:
+        API_SECRET: ${{ secrets.mobile_testing_judo_api_secret }}
+        API_TOKEN: ${{ secrets.mobile_testing_judo_api_token }}
+        JUDO_ID: ${{ secrets.mobile_testing_judo_id }}
+      run: |
+        printf 'JUDO_ID=%s\nAPI_TOKEN=%s\nAPI_SECRET=%s\n' "$JUDO_ID" "$API_TOKEN" "$API_SECRET" > .env
+        node scripts/inject_envs.js
+    - name: Start Simulator
+      env:
+        SIMULATOR_DEVICE: ${{ inputs.simulator_device }}
+      run: |
+        shopt -s nullglob
+        apps=("$RUNNER_TEMP"/fastlane_output/*-simulator.app)
+        if [ "${#apps[@]}" -ne 1 ]; then echo "::error::Expected one simulator app, found ${#apps[@]}"; exit 1; fi
+        udid=$(xcrun simctl create maestro "$SIMULATOR_DEVICE")
+        xcrun simctl bootstatus "$udid" -b
+        # The keyboard's onboarding tips appear mid-run and cover the app.
+        for key in DidShowContinuousPathIntroduction KeyboardDidShowProductivityTutorial; do
+          xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences "$key" -bool true
+        done
+        xcrun simctl install "$udid" "${apps[0]}"
+        echo "UDID=$udid" >> "$GITHUB_ENV"
+        echo "APP_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${apps[0]}/Info.plist")" >> "$GITHUB_ENV"
+    # The app imports its settings by pasting from the device clipboard, which holds one config at a time.
+    - name: Run Maestro Tests
+      working-directory: ${{ runner.temp }}/maestro-tests
+      env:
+        EXCLUDE_TAGS: ${{ inputs.exclude_tags }}
+        INCLUDE_TAGS: ${{ inputs.include_tags }}
+      run: |
+        if [ -z "$INCLUDE_TAGS" ]; then echo "::error::include_tags is empty"; exit 1; fi
+        status=0
+        for tag in ${INCLUDE_TAGS//,/ }; do
+          xcrun simctl pbcopy "$UDID" < "configs/$tag.json"
+          # The app pastes nothing once the copy is about 15 minutes old, so it is renewed while the flows run.
+          ( while sleep 60; do xcrun simctl pbcopy "$UDID" < "configs/$tag.json"; done ) &
+          copier=$!
+          maestro-runner --platform ios --device "$UDID" test --env-file .env -e APP_ID="$APP_ID" --include-tags "$tag" --exclude-tags "$EXCLUDE_TAGS" --output "$RUNNER_TEMP/reports/$tag" --flatten --record tests || status=1
+          kill "$copier"
+        done
+        exit "$status"
+    - name: Store Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: maestro-reports
+        path: ${{ runner.temp }}/reports
