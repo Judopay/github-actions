@@ -6,8 +6,8 @@ on:
         description: Bundle ID of the sample app under test
         required: false
         type: string
-        # Fastlane appends a .staging suffix, so this has to match the app_file build.
-        default: com.judokit.android.examples.staging
+        # Fastlane appends a .staging suffix only for staging, so this has to match the app_file build.
+        default: com.judokit.android.examples
       api_level:
         description: Android API level to run the tests on
         required: false
@@ -17,7 +17,7 @@ on:
         description: Sample app to fetch from the results bucket
         required: false
         type: string
-        default: judokit-android-examples-staging-release.apk
+        default: judokit-android-examples-production-release.apk
       device_profile:
         description: Emulator hardware profile, which also sets the screen
         required: false
@@ -143,7 +143,7 @@ jobs:
           adb install -r "${{ runner.temp }}/sample-app.apk"
           ./scripts/push_configs.sh
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
-          maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --record tests
+          maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --video on-failure tests
     - name: Store Reports
       if: always()
       uses: actions/upload-artifact@v4
