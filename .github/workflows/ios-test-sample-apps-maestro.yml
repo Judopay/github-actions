@@ -11,7 +11,7 @@ on:
         description: Maestro tags to skip, comma separated
         required: false
         type: string
-        default: android_only,objc_only
+        default: ravelin,android_only
       flavor:
         description: Sample app flavor to build, as named in the Fastfile
         required: false
