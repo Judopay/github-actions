@@ -123,7 +123,7 @@ jobs:
         profile: ${{ inputs.device_profile }}
         ram-size: 4096M
         script: echo "Generated AVD snapshot for caching."
-        target: google_atd
+        target: google_apis
     - name: Run Maestro Tests
       uses: reactivecircus/android-emulator-runner@v2
       env:
@@ -139,7 +139,7 @@ jobs:
         force-avd-creation: false
         profile: ${{ inputs.device_profile }}
         ram-size: 4096M
-        target: google_atd
+        target: google_apis
         script: |
           adb install -r "${{ runner.temp }}/sample-app.apk"
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
