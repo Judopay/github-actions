@@ -89,13 +89,14 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     - name: Restore Sample App
       run: gcloud storage cp "gs://${{ vars.firebase_results_bucket }}/sample-apps/${{ github.repository }}/${{ inputs.app_file }}" "${{ runner.temp }}/sample-app.apk"
-    # push_configs.sh reads .env and writes the credentials into configs/*.json before pushing them to the device.
     - name: Write Test Environment
       env:
         API_SECRET: ${{ secrets.mobile_testing_judo_api_secret }}
         API_TOKEN: ${{ secrets.mobile_testing_judo_api_token }}
         JUDO_ID: ${{ secrets.mobile_testing_judo_id }}
-      run: printf 'JUDO_ID=%s\nAPI_TOKEN=%s\nAPI_SECRET=%s\n' "$JUDO_ID" "$API_TOKEN" "$API_SECRET" > .env
+      run: |
+        printf 'JUDO_ID=%s\nAPI_TOKEN=%s\nAPI_SECRET=%s\n' "$JUDO_ID" "$API_TOKEN" "$API_SECRET" > .env
+        node scripts/inject_envs.js
     - name: Enable KVM # Required for Android Emulator
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -141,7 +142,6 @@ jobs:
         target: google_atd
         script: |
           adb install -r "${{ runner.temp }}/sample-app.apk"
-          ./scripts/push_configs.sh
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
           maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --video on-failure tests
     - name: Store Reports
