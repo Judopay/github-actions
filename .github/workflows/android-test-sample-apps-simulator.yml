@@ -31,7 +31,7 @@ jobs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-34
+        key: avd-34-pixel_3-google_atd
     - name: Create AVD
       if: steps.avd-cache.outputs.cache-hit != 'true'
       uses: reactivecircus/android-emulator-runner@v2
