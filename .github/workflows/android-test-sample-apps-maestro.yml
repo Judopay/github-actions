@@ -141,6 +141,9 @@ jobs:
         ram-size: 4096M
         target: google_apis
         script: |
+          adb logcat -c || true
+          # Backgrounded so the log keeps growing past a failing test step, which ends the script.
+          adb logcat -v threadtime > "${{ runner.temp }}/logcat.txt" 2>&1 &
           adb install -r "${{ runner.temp }}/sample-app.apk"
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
           maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --video on-failure tests
@@ -150,3 +153,11 @@ jobs:
       with:
         name: maestro-reports
         path: ${{ env.REPORT_DIR }}
+    # Goes to the bucket rather than the artifact above, which anyone can download on a public repo.
+    - name: Store Device Log
+      if: always()
+      env:
+        LOG_FILE: ${{ runner.temp }}/logcat.txt
+      run: |
+        test -f "$LOG_FILE" || { echo 'No device log was captured.'; exit 0; }
+        gcloud storage cp "$LOG_FILE" "gs://${{ vars.firebase_results_bucket }}/maestro-logs/${{ github.repository }}/${{ github.run_id }}/${{ github.run_attempt }}/logcat.txt"
