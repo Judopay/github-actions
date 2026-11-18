@@ -61,6 +61,7 @@ on:
         description: SSH key for accessing Github repositories
 env:
   AVD_NAME: maestro_test_avd
+  EMULATOR_TARGET: google_apis
   REPORT_DIR: ${{ github.workspace }}/reports
 jobs:
   maestro_tests:
@@ -109,7 +110,7 @@ jobs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-${{ inputs.api_level }}-${{ inputs.device_profile }}
+        key: avd-${{ inputs.api_level }}-${{ inputs.device_profile }}-${{ env.EMULATOR_TARGET }}
     - name: Create AVD
       if: steps.avd-cache.outputs.cache-hit != 'true'
       uses: reactivecircus/android-emulator-runner@v2
@@ -123,7 +124,7 @@ jobs:
         profile: ${{ inputs.device_profile }}
         ram-size: 4096M
         script: echo "Generated AVD snapshot for caching."
-        target: google_apis
+        target: ${{ env.EMULATOR_TARGET }}
     - name: Run Maestro Tests
       uses: reactivecircus/android-emulator-runner@v2
       env:
@@ -139,7 +140,7 @@ jobs:
         force-avd-creation: false
         profile: ${{ inputs.device_profile }}
         ram-size: 4096M
-        target: google_apis
+        target: ${{ env.EMULATOR_TARGET }}
         script: |
           adb logcat -c || true
           # Backgrounded so the log keeps growing past a failing test step, which ends the script.
