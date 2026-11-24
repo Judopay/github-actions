@@ -37,7 +37,7 @@ on:
         description: Version of maestro-runner to install
         required: false
         type: string
-        default: 1.1.28
+        default: 1.1.31
       tests_ref:
         description: Ref of Judopay/e2e-tests-maestro to run
         required: false
