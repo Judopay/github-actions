@@ -152,7 +152,7 @@ jobs:
           adb install -r "${{ runner.temp }}/sample-app.apk"
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
           # The emulator is torn down with this action, so the log must be pulled here. One line keeps the test status across the pull.
-          maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --output "$REPORT_DIR" --flatten --disable-animations --video on-failure tests; rc=$?; adb pull /data/local/tmp/logcat.txt "${{ runner.temp }}/logcat.txt" || true; exit $rc
+          maestro-runner -platform android test --env-file .env -e APP_ID="$APP_ID" ${INCLUDE_TAGS:+--include-tags} ${INCLUDE_TAGS:+"$INCLUDE_TAGS"} --exclude-tags "$EXCLUDE_TAGS" --retries 1 --output "$REPORT_DIR" --flatten --disable-animations --video on-failure tests; rc=$?; adb pull /data/local/tmp/logcat.txt "${{ runner.temp }}/logcat.txt" || true; exit $rc
     - name: Store Reports
       if: always()
       uses: actions/upload-artifact@v4

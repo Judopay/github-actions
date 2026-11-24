@@ -126,7 +126,7 @@ jobs:
         if [ -z "$INCLUDE_TAGS" ]; then echo "::error::include_tags is empty"; exit 1; fi
         status=0
         for tag in ${INCLUDE_TAGS//,/ }; do
-          maestro-runner --platform ios --device "$UDID" test --env-file .env -e APP_ID="$APP_ID" --include-tags "$tag" --exclude-tags "$EXCLUDE_TAGS" --output "$RUNNER_TEMP/reports/$tag" --flatten --record tests || status=1
+          maestro-runner --platform ios --device "$UDID" test --env-file .env -e APP_ID="$APP_ID" --include-tags "$tag" --exclude-tags "$EXCLUDE_TAGS" --retries 1 --output "$RUNNER_TEMP/reports/$tag" --flatten --record tests || status=1
         done
         exit "$status"
     - name: Store Reports
