@@ -146,6 +146,9 @@ jobs:
           # Captured on the device so an adb reset cannot truncate it. -f appends, hence the rm; stdio is detached or adb shell never returns.
           adb shell rm -f /data/local/tmp/logcat.txt
           adb shell "nohup logcat -v threadtime -f /data/local/tmp/logcat.txt </dev/null >/dev/null 2>&1 &"
+          # maestro-runner's driver has twice stalled for an hour right after probing the Google app's frozen WebView. The grep fails the step if the disable did not take.
+          adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
+          adb shell pm list packages -d | grep -q 'package:com.google.android.googlequicksearchbox'
           adb install -r "${{ runner.temp }}/sample-app.apk"
           # Each line runs as its own `sh -c`, so this stays one POSIX command. An empty --include-tags would match no flows, so the flag is dropped with it.
           # The emulator is torn down with this action, so the log must be pulled here. One line keeps the test status across the pull.
