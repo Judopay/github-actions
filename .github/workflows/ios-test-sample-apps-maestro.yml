@@ -18,7 +18,7 @@ on:
         type: string
         default: obj-c
       include_tags:
-        description: Maestro tags to run, comma separated. Each runs as its own pass with configs/<tag>.json on the clipboard.
+        description: Maestro tags to run, comma separated. Each runs as its own pass.
         required: false
         type: string
         default: default
@@ -117,7 +117,6 @@ jobs:
         xcrun simctl install "$udid" "${apps[0]}"
         echo "UDID=$udid" >> "$GITHUB_ENV"
         echo "APP_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${apps[0]}/Info.plist")" >> "$GITHUB_ENV"
-    # The app imports its settings by pasting from the device clipboard, which holds one config at a time.
     - name: Run Maestro Tests
       working-directory: ${{ runner.temp }}/maestro-tests
       env:
@@ -127,12 +126,7 @@ jobs:
         if [ -z "$INCLUDE_TAGS" ]; then echo "::error::include_tags is empty"; exit 1; fi
         status=0
         for tag in ${INCLUDE_TAGS//,/ }; do
-          xcrun simctl pbcopy "$UDID" < "configs/$tag.json"
-          # The app pastes nothing once the copy is about 15 minutes old, so it is renewed while the flows run.
-          ( while sleep 60; do xcrun simctl pbcopy "$UDID" < "configs/$tag.json"; done ) &
-          copier=$!
           maestro-runner --platform ios --device "$UDID" test --env-file .env -e APP_ID="$APP_ID" --include-tags "$tag" --exclude-tags "$EXCLUDE_TAGS" --output "$RUNNER_TEMP/reports/$tag" --flatten --record tests || status=1
-          kill "$copier"
         done
         exit "$status"
     - name: Store Reports
