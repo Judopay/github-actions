@@ -38,6 +38,9 @@ on:
         type: string
         default: master
     secrets:
+      google_cloud_service_account_key:
+        required: true
+        description: JSON key for Google Cloud service account for GCS authentication
       mobile_testing_judo_api_secret:
         required: true
         description: API secret the tests authenticate with
@@ -102,6 +105,14 @@ jobs:
         node-version: 22
     - name: Install Maestro Runner
       run: npm install --global "maestro-runner@${{ inputs.maestro_runner_version }}"
+    - name: Set up Google Cloud Authentication
+      uses: google-github-actions/auth@v2
+      with:
+        create_credentials_file: true
+        credentials_json: ${{ secrets.google_cloud_service_account_key }}
+        project_id: ${{ vars.firebase_gcp_project }}
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
     - name: Write Test Environment
       working-directory: ${{ runner.temp }}/maestro-tests
       env:
@@ -120,6 +131,7 @@ jobs:
         if [ "${#apps[@]}" -ne 1 ]; then echo "::error::Expected one simulator app, found ${#apps[@]}"; exit 1; fi
         udid=$(xcrun simctl create maestro "$SIMULATOR_DEVICE")
         xcrun simctl bootstatus "$udid" -b
+        nohup xcrun simctl spawn "$udid" log stream --level debug --style compact > "$RUNNER_TEMP/simulator.log" 2>&1 < /dev/null &
         # The keyboard's onboarding tips appear mid-run and cover the app.
         for key in DidShowContinuousPathIntroduction KeyboardDidShowProductivityTutorial; do
           xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences "$key" -bool true
@@ -145,3 +157,12 @@ jobs:
       with:
         name: maestro-reports-${{ inputs.flavor }}
         path: ${{ runner.temp }}/reports
+    # Goes to the bucket rather than the artifact above, which anyone can download on a public repo.
+    - name: Store Simulator Log
+      if: always()
+      env:
+        LOG_FILE: ${{ runner.temp }}/simulator.log
+      run: |
+        test -f "$LOG_FILE" || { echo 'No simulator log was captured.'; exit 0; }
+        gzip -c "$LOG_FILE" > "$LOG_FILE.gz"
+        gcloud storage cp "$LOG_FILE.gz" "gs://${{ vars.firebase_results_bucket }}/maestro-logs/${{ github.repository }}/${{ github.run_id }}/${{ github.run_attempt }}/simulator-${{ inputs.flavor }}.log.gz"
