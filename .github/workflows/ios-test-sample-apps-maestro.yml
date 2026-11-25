@@ -74,6 +74,16 @@ jobs:
       run: git clone --depth 1 --branch "$TESTS_REF" git@github.com:Judopay/e2e-tests-maestro.git "$RUNNER_TEMP/maestro-tests"
     - name: Set up Ruby
       uses: Judopay/github-actions/actions/setup-ruby@master
+    # A React Native app's pods need its JavaScript dependencies.
+    - name: Set up Node.js for the App
+      if: ${{ hashFiles('.nvmrc') != '' }}
+      uses: actions/setup-node@v4
+      with:
+        cache: yarn
+        node-version-file: .nvmrc
+    - name: Yarn Install
+      if: ${{ hashFiles('yarn.lock') != '' }}
+      run: yarn install --immutable
     - name: Pod Install
       uses: Judopay/github-actions/actions/pod-install@master
     # The published .ipa is device signed, so the tests need their own simulator build.
