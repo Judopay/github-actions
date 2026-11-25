@@ -131,7 +131,9 @@ jobs:
         if [ "${#apps[@]}" -ne 1 ]; then echo "::error::Expected one simulator app, found ${#apps[@]}"; exit 1; fi
         udid=$(xcrun simctl create maestro "$SIMULATOR_DEVICE")
         xcrun simctl bootstatus "$udid" -b
-        nohup xcrun simctl spawn "$udid" log stream --level debug --style compact > "$RUNNER_TEMP/simulator.log" 2>&1 < /dev/null &
+        # Only the app's own process: the whole simulator's log slows the tests down.
+        app_process=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${apps[0]}/Info.plist")
+        nohup xcrun simctl spawn "$udid" log stream --level debug --style compact --predicate "process == \"$app_process\"" > "$RUNNER_TEMP/simulator.log" 2>&1 < /dev/null &
         # The keyboard's onboarding tips appear mid-run and cover the app.
         for key in DidShowContinuousPathIntroduction KeyboardDidShowProductivityTutorial; do
           xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences "$key" -bool true
