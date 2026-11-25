@@ -70,6 +70,8 @@ jobs:
     - name: Yarn Install
       if: ${{ hashFiles('yarn.lock') != '' }}
       run: yarn install --immutable
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
     - name: Run Build
       uses: maierj/fastlane-action@v3.1.0
       env:
